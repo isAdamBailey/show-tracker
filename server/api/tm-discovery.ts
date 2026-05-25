@@ -1,4 +1,4 @@
-import type { TmDiscoveryProxyResponse, TmDiscoveryResponse } from '~/app/types/music'
+import type { TmDiscoveryProxyResponse, TmDiscoveryResponse } from '../../app/types/music'
 
 const ALLOWED_QUERY_KEYS = ['geoPoint', 'dmaId', 'keyword', 'classificationName'] as const
 

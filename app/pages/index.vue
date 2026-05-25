@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { encode as encodeGeoHash } from 'ngeohash'
-import { useMusicCacheStore, type LocationPermissionState } from '~/app/stores/music-cache'
-import type { LocalDiscoveryLookup } from '~/app/utils/query-keys'
-import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '~/app/types/music'
+import { useMusicCacheStore, type LocationPermissionState } from '../stores/music-cache'
+import type { LocalDiscoveryLookup } from '../utils/query-keys'
+import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../types/music'
 
 const FALLBACK_DMA_ID = '37'
 const EVENT_GEOHASH_PRECISION = 9
@@ -25,7 +25,7 @@ const getArtistRoute = (event: TicketmasterEvent): string | null => {
   if (!artistName) {
     return null
   }
-  return `/artist/${encodeURIComponent(artistName)}`
+  return `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(artistName)}`
 }
 
 const getLookupLabel = (lookup: LocalDiscoveryLookup): string => {
@@ -179,7 +179,7 @@ onMounted(async () => {
             :to="getArtistRoute(event) || ''"
             class="mt-3 inline-block text-xs font-medium text-sky-400 hover:text-sky-300"
           >
-            View artist history
+            View show + setlist history
           </NuxtLink>
           <p v-else class="mt-3 text-xs text-slate-500">
             Artist history unavailable for this event.

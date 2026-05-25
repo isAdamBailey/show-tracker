@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { SetlistItem, SetlistSet, SetlistSong } from '~/app/types/music'
+import type { SetlistItem, SetlistSet, SetlistSong } from '../types/music'
 
 const props = defineProps<{
   setlists: SetlistItem[]

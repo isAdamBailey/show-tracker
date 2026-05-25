@@ -1,12 +1,12 @@
 import { ref } from 'vue'
-import type { SetlistItem, TicketmasterEvent } from '~/app/types/music'
+import type { SetlistItem, TicketmasterEvent } from '../types/music'
 import {
   buildArtistUpcomingCacheKey,
   buildGenreCacheKey,
   buildLocalDiscoveryCacheKey,
   buildSetlistHistoryCacheKey,
   type LocalDiscoveryLookup
-} from '~/app/utils/query-keys'
+} from '../utils/query-keys'
 
 type EventCache = Record<string, TicketmasterEvent[]>
 type SetlistCache = Record<string, SetlistItem[]>

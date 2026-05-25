@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useMusicCacheStore } from '~/app/stores/music-cache'
-import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '~/app/types/music'
+import { useMusicCacheStore } from '../../stores/music-cache'
+import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../../types/music'
 
 const route = useRoute()
 const musicCacheStore = useMusicCacheStore()
@@ -25,12 +25,12 @@ const getArtistNameFromEvent = (event: TicketmasterEvent): string | null => {
   return artistName ?? null
 }
 
-const goToArtist = async (event: TicketmasterEvent): Promise<void> => {
+const goToShow = async (event: TicketmasterEvent): Promise<void> => {
   const artistName = getArtistNameFromEvent(event)
   if (!artistName) {
     return
   }
-  await navigateTo(`/artist/${encodeURIComponent(artistName)}`)
+  await navigateTo(`/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(artistName)}`)
 }
 
 const fetchGenreEvents = async (): Promise<void> => {
@@ -127,7 +127,7 @@ watch(classificationName, async () => {
               ? 'cursor-pointer hover:border-slate-600 hover:bg-slate-900'
               : 'cursor-not-allowed opacity-80'
           "
-          @click="goToArtist(event)"
+          @click="goToShow(event)"
         >
           <h3 class="text-base font-medium text-slate-100">{{ event.name }}</h3>
           <p class="mt-1 text-sm text-slate-300">
@@ -144,7 +144,7 @@ watch(classificationName, async () => {
             </span>
           </p>
           <p v-if="getArtistNameFromEvent(event)" class="mt-3 text-xs font-medium text-sky-400">
-            View artist history
+            View show + setlist history
           </p>
           <p v-else class="mt-3 text-xs text-slate-500">
             Artist unavailable from Ticketmaster event data

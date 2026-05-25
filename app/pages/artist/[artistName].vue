@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import SetlistAccordion from '~/app/components/SetlistAccordion.vue'
+import SetlistAccordion from '../../components/SetlistAccordion.vue'
 import type {
   SetlistHistoryResponse,
   SetlistItem,
   TicketmasterEvent,
   TmDiscoveryResponse
-} from '~/app/types/music'
+} from '../../types/music'
 
 interface ArtistPagePayload {
   upcomingEvents: TicketmasterEvent[]
@@ -37,6 +37,19 @@ const normalizeSetlists = (response: SetlistHistoryResponse): SetlistItem[] => {
 
 const normalizeEvents = (response: TmDiscoveryResponse): TicketmasterEvent[] => {
   return response._embedded?.events ?? []
+}
+
+const getEventArtistName = (event: TicketmasterEvent): string | null => {
+  const ticketmasterArtistName = event._embedded?.attractions?.[0]?.name
+  return ticketmasterArtistName ?? artistName.value
+}
+
+const getShowRoute = (event: TicketmasterEvent): string | null => {
+  const eventArtistName = getEventArtistName(event)
+  if (!eventArtistName) {
+    return null
+  }
+  return `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(eventArtistName)}`
 }
 
 const { data, pending, refresh } = await useAsyncData<ArtistPagePayload>(
@@ -154,15 +167,24 @@ const isEmpty = computed<boolean>(
               , {{ event._embedded?.venues?.[0]?.country?.name }}
             </span>
           </p>
-          <a
-            v-if="event.url"
-            :href="event.url"
-            target="_blank"
-            rel="noreferrer noopener"
-            class="mt-3 inline-block text-xs font-medium text-sky-400 hover:text-sky-300"
-          >
-            View event
-          </a>
+          <div class="mt-3 flex flex-wrap items-center gap-3">
+            <NuxtLink
+              v-if="getShowRoute(event)"
+              :to="getShowRoute(event) || ''"
+              class="text-xs font-medium text-sky-400 hover:text-sky-300"
+            >
+              View show + setlist history
+            </NuxtLink>
+            <a
+              v-if="event.url"
+              :href="event.url"
+              target="_blank"
+              rel="noreferrer noopener"
+              class="text-xs font-medium text-slate-400 hover:text-slate-300"
+            >
+              Open Ticketmaster listing
+            </a>
+          </div>
         </article>
       </div>
     </section>

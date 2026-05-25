@@ -1,4 +1,4 @@
-import type { SetlistHistoryProxyResponse, SetlistHistoryResponse } from '~/app/types/music'
+import type { SetlistHistoryProxyResponse, SetlistHistoryResponse } from '../../app/types/music'
 
 interface SetlistQuery {
   artistName: string

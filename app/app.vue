@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import GlobalSearch from '~/app/components/GlobalSearch.vue'
+import GlobalSearch from './components/GlobalSearch.vue'
 </script>
 
 <template>
