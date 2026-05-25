@@ -78,14 +78,14 @@ const submitSearch = async (): Promise<void> => {
 
 <template>
   <form
-    class="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/60 p-3 md:flex-row md:items-center"
+    class="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 shadow-lg shadow-sky-950/30 md:flex-row md:items-center"
     @submit.prevent="submitSearch"
   >
     <label class="sr-only" for="search-mode">Search mode</label>
     <select
       id="search-mode"
       v-model="searchMode"
-      class="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-500"
+      class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20"
     >
       <option value="artist">Artist</option>
       <option value="genre">Genre</option>
@@ -97,7 +97,7 @@ const submitSearch = async (): Promise<void> => {
       id="search-value"
       v-model="searchValue"
       type="text"
-      class="flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-500"
+      class="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20"
       placeholder="Search artist"
     >
     <input
@@ -105,7 +105,7 @@ const submitSearch = async (): Promise<void> => {
       v-model="artistCity"
       type="text"
       list="city-options"
-      class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-500 md:w-44"
+      class="w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 md:w-44"
       placeholder="City"
     >
     <input
@@ -114,7 +114,7 @@ const submitSearch = async (): Promise<void> => {
       v-model="searchValue"
       type="text"
       list="ticketmaster-genre-options"
-      class="flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-500"
+      class="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20"
       :placeholder="genreLoading ? 'Loading genres...' : 'Type a genre (e.g. Punk)'"
     >
     <input
@@ -122,7 +122,7 @@ const submitSearch = async (): Promise<void> => {
       v-model="artistCity"
       type="text"
       list="city-options"
-      class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-500 md:w-44"
+      class="w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 md:w-44"
       placeholder="City"
     >
     <datalist id="city-options">
@@ -134,7 +134,7 @@ const submitSearch = async (): Promise<void> => {
 
     <button
       type="submit"
-      class="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+      class="rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-sky-900/40 transition hover:from-sky-500 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
       :disabled="isEmptySearch"
     >
       Search
