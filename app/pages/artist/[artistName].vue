@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useMusicCacheStore } from '../../stores/music-cache'
-import { filterEventsWithinRadius, resolveCityFallback, resolveSearchCenter } from '../../utils/location'
+import ShowSetlistButton from '../../components/ShowSetlistButton.vue'
 import type { TicketmasterEvent, TmDiscoveryResponse } from '../../types/music'
 
 interface ArtistPagePayload {
@@ -10,7 +9,6 @@ interface ArtistPagePayload {
 }
 
 const route = useRoute()
-const musicCacheStore = useMusicCacheStore()
 
 const rawArtistParam = computed<string>(() => {
   const value = route.params.artistName
@@ -21,6 +19,16 @@ const rawArtistParam = computed<string>(() => {
 })
 
 const artistName = computed<string>(() => decodeURIComponent(rawArtistParam.value))
+const cityFromQuery = computed<string>(() => {
+  const value = route.query.city
+  if (Array.isArray(value)) {
+    return decodeURIComponent(value[0] ?? '')
+  }
+  if (typeof value !== 'string') {
+    return ''
+  }
+  return decodeURIComponent(value)
+})
 
 const normalizeEvents = (response: TmDiscoveryResponse): TicketmasterEvent[] => {
   return response._embedded?.events ?? []
@@ -36,16 +44,23 @@ const getShowRoute = (event: TicketmasterEvent): string | null => {
   if (!eventArtistName) {
     return null
   }
-  return `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(eventArtistName)}`
+  const basePath = `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(eventArtistName)}`
+  if (!cityFromQuery.value) {
+    return basePath
+  }
+  return `${basePath}&city=${encodeURIComponent(cityFromQuery.value)}`
 }
 
 const { data, pending, refresh } = await useAsyncData<ArtistPagePayload>(
-  () => `artist-page:${rawArtistParam.value}`,
+  () => `artist-page:${rawArtistParam.value}:${cityFromQuery.value}`,
   async () => {
-    const encodedArtistName = encodeURIComponent(artistName.value)
+    const keyword = cityFromQuery.value
+      ? `${artistName.value} ${cityFromQuery.value}`
+      : artistName.value
+    const encodedKeyword = encodeURIComponent(keyword)
     try {
       const upcomingResponse = await $fetch<TmDiscoveryResponse>(
-        `/api/tm-discovery?keyword=${encodedArtistName}`
+        `/api/tm-discovery?keyword=${encodedKeyword}`
       )
       return {
         upcomingEvents: normalizeEvents(upcomingResponse),
@@ -58,27 +73,13 @@ const { data, pending, refresh } = await useAsyncData<ArtistPagePayload>(
       }
     }
   },
-  { watch: [artistName] }
+  { watch: [artistName, cityFromQuery] }
 )
 
 const upcomingEvents = computed<TicketmasterEvent[]>(() => data.value?.upcomingEvents ?? [])
-const nearbyUpcomingEvents = computed<TicketmasterEvent[]>(() => {
-  const localCenter = resolveSearchCenter(musicCacheStore.location)
-  const fallbackCity = resolveCityFallback(musicCacheStore.location)
-  return filterEventsWithinRadius(upcomingEvents.value, localCenter, 100, fallbackCity)
-})
-const displayUpcomingEvents = computed<TicketmasterEvent[]>(() => {
-  if (nearbyUpcomingEvents.value.length > 0) {
-    return nearbyUpcomingEvents.value
-  }
-  return upcomingEvents.value
-})
 const upcomingError = computed<string | null>(() => data.value?.upcomingError ?? null)
 
-const hasUpcomingData = computed<boolean>(() => displayUpcomingEvents.value.length > 0)
-const isUsingUpcomingFallback = computed<boolean>(
-  () => nearbyUpcomingEvents.value.length === 0 && upcomingEvents.value.length > 0
-)
+const hasUpcomingData = computed<boolean>(() => upcomingEvents.value.length > 0)
 
 const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value && !hasUpcomingData.value)
 </script>
@@ -87,7 +88,10 @@ const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value &
   <main class="mx-auto flex max-w-6xl flex-col gap-6 p-6">
     <header class="space-y-1">
       <h1 class="text-3xl font-semibold tracking-tight text-slate-100">{{ artistName }}</h1>
-      <p class="text-sm text-slate-400">Upcoming tour dates for this artist.</p>
+      <p class="text-sm text-slate-400">
+        Upcoming tour dates for this artist
+        <span v-if="cityFromQuery">in {{ cityFromQuery }}</span>.
+      </p>
     </header>
 
     <section
@@ -120,12 +124,9 @@ const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value &
 
     <section v-if="hasUpcomingData" class="space-y-3">
       <h2 class="text-xl font-medium text-slate-100">Upcoming Tour Dates</h2>
-      <p v-if="isUsingUpcomingFallback" class="text-xs text-amber-300">
-        Showing Ticketmaster results without distance filtering because venue coordinates were unavailable.
-      </p>
       <div class="grid gap-3 md:grid-cols-2">
         <article
-          v-for="event in displayUpcomingEvents"
+          v-for="event in upcomingEvents"
           :key="event.id"
           class="rounded-lg border border-slate-800 bg-slate-900/60 p-4"
         >
@@ -144,19 +145,13 @@ const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value &
             </span>
           </p>
           <div class="mt-3 flex flex-wrap items-center gap-3">
-            <NuxtLink
-              v-if="getShowRoute(event)"
-              :to="getShowRoute(event) || ''"
-              class="text-xs font-medium text-sky-400 hover:text-sky-300"
-            >
-              View show + setlist history
-            </NuxtLink>
+            <ShowSetlistButton :to="getShowRoute(event)" />
             <a
               v-if="event.url"
               :href="event.url"
               target="_blank"
               rel="noreferrer noopener"
-              class="text-xs font-medium text-slate-400 hover:text-slate-300"
+              class="w-full text-center text-xs font-medium text-slate-400 hover:text-slate-300"
             >
               Open Ticketmaster listing
             </a>

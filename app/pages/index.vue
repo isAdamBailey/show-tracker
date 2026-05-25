@@ -1,20 +1,18 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
-import { encode as encodeGeoHash } from 'ngeohash'
-import { useMusicCacheStore, type LocationPermissionState } from '../stores/music-cache'
-import { filterEventsWithinRadius, resolveCityFallback, resolveSearchCenter } from '../utils/location'
+import { onMounted, ref } from 'vue'
+import ShowSetlistButton from '../components/ShowSetlistButton.vue'
+import { useMusicCacheStore } from '../stores/music-cache'
 import type { LocalDiscoveryLookup } from '../utils/query-keys'
 import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../types/music'
 
 const FALLBACK_DMA_ID = '37'
-const EVENT_GEOHASH_PRECISION = 9
+const DEFAULT_LOOKUP: LocalDiscoveryLookup = { dmaId: FALLBACK_DMA_ID }
 
 const musicCacheStore = useMusicCacheStore()
 
 const events = ref<TicketmasterEvent[]>([])
 const loading = ref<boolean>(true)
 const errorMessage = ref<string | null>(null)
-const activeLookup = ref<LocalDiscoveryLookup>({ dmaId: FALLBACK_DMA_ID })
 
 const getArtistNameFromEvent = (event: TicketmasterEvent): string | null => {
   const artistName = event._embedded?.attractions?.[0]?.name
@@ -29,44 +27,11 @@ const getArtistRoute = (event: TicketmasterEvent): string | null => {
   return `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(artistName)}`
 }
 
-const getLookupLabel = (lookup: LocalDiscoveryLookup): string => {
-  if (musicCacheStore.location.selectedCity === 'portland') {
-    return 'Portland'
-  }
-  if (lookup.geoPoint) {
-    return 'your current location'
-  }
-  if (lookup.dmaId) {
-    return 'Portland/Vancouver metro'
-  }
-  return 'local area'
-}
-
-const getPreferredLookup = (): LocalDiscoveryLookup => {
-  if (musicCacheStore.location.selectedCity === 'portland') {
-    return { dmaId: FALLBACK_DMA_ID }
-  }
-
-  if (musicCacheStore.location.source === 'geoPoint' && musicCacheStore.location.geoPoint) {
-    return { geoPoint: musicCacheStore.location.geoPoint }
-  }
-
-  if (musicCacheStore.location.dmaId) {
-    return { dmaId: musicCacheStore.location.dmaId }
-  }
-
-  return { dmaId: FALLBACK_DMA_ID }
-}
-
-const fetchLocalEvents = async (lookup: LocalDiscoveryLookup): Promise<void> => {
-  const effectiveLookup =
-    musicCacheStore.location.selectedCity === 'portland' ? { dmaId: FALLBACK_DMA_ID } : lookup
-
+const fetchLocalEvents = async (): Promise<void> => {
   loading.value = true
   errorMessage.value = null
-  activeLookup.value = effectiveLookup
 
-  const cachedEvents = musicCacheStore.getLocalDiscovery(effectiveLookup)
+  const cachedEvents = musicCacheStore.getLocalDiscovery(DEFAULT_LOOKUP)
   if (cachedEvents) {
     events.value = cachedEvents
     loading.value = false
@@ -74,15 +39,11 @@ const fetchLocalEvents = async (lookup: LocalDiscoveryLookup): Promise<void> => 
   }
 
   try {
-    const query = effectiveLookup.geoPoint
-      ? { geoPoint: effectiveLookup.geoPoint }
-      : { dmaId: effectiveLookup.dmaId ?? FALLBACK_DMA_ID }
-    const response = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', { query })
-    const localCenter = resolveSearchCenter(musicCacheStore.location)
-    const fallbackCity = resolveCityFallback(musicCacheStore.location)
-    const nearbyEvents = filterEventsWithinRadius(response._embedded.events, localCenter, 100, fallbackCity)
-    events.value = nearbyEvents
-    musicCacheStore.setLocalDiscovery(effectiveLookup, nearbyEvents)
+    const response = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
+      query: { dmaId: FALLBACK_DMA_ID }
+    })
+    events.value = response._embedded.events
+    musicCacheStore.setLocalDiscovery(DEFAULT_LOOKUP, response._embedded.events)
   } catch {
     events.value = []
     errorMessage.value = 'Unable to load local events right now.'
@@ -91,72 +52,16 @@ const fetchLocalEvents = async (lookup: LocalDiscoveryLookup): Promise<void> => 
   }
 }
 
-const fetchWithFallbackDma = async (permission: LocationPermissionState): Promise<void> => {
-  musicCacheStore.setLocationByDmaId(FALLBACK_DMA_ID, permission)
-  await fetchLocalEvents({ dmaId: FALLBACK_DMA_ID })
-}
-
-const isPermissionDeniedError = (error: unknown): boolean => {
-  if (typeof error !== 'object' || error === null || !('code' in error)) {
-    return false
-  }
-  const code = (error as { code?: number }).code
-  return code === 1
-}
-
-const requestGeolocation = async (): Promise<void> => {
-  if (!navigator.geolocation) {
-    await fetchWithFallbackDma('unavailable')
-    return
-  }
-
-  try {
-    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000
-      })
-    })
-    const geoPoint = encodeGeoHash(
-      position.coords.latitude,
-      position.coords.longitude,
-      EVENT_GEOHASH_PRECISION
-    )
-    musicCacheStore.setLocationByGeoPoint(
-      geoPoint,
-      position.coords.latitude,
-      position.coords.longitude
-    )
-    await fetchLocalEvents({ geoPoint })
-  } catch (error: unknown) {
-    if (isPermissionDeniedError(error)) {
-      await fetchWithFallbackDma('denied')
-      return
-    }
-    await fetchWithFallbackDma('unavailable')
-  }
-}
-
 onMounted(async () => {
-  await requestGeolocation()
+  await fetchLocalEvents()
 })
-
-watch(
-  () => musicCacheStore.location.selectedCity,
-  async () => {
-    await fetchLocalEvents(getPreferredLookup())
-  }
-)
 </script>
 
 <template>
   <main class="mx-auto flex max-w-6xl flex-col gap-6 p-6">
     <header class="space-y-1">
       <h1 class="text-3xl font-semibold tracking-tight text-slate-100">Local Upcoming Music</h1>
-      <p class="text-sm text-slate-400">
-        Showing events for {{ getLookupLabel(activeLookup) }} via Ticketmaster Discovery.
-      </p>
+      <p class="text-sm text-slate-400">Showing events for Portland/Vancouver metro.</p>
     </header>
 
     <section
@@ -174,7 +79,7 @@ watch(
       <button
         type="button"
         class="mt-3 rounded-md bg-red-700 px-3 py-2 text-xs font-medium text-white transition hover:bg-red-600"
-        @click="fetchLocalEvents(activeLookup)"
+        @click="fetchLocalEvents"
       >
         Retry
       </button>
@@ -184,7 +89,7 @@ watch(
       v-else-if="events.length === 0"
       class="rounded-lg border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300"
     >
-      No upcoming local music events found.
+      Enter an artist and optional city above to find shows.
     </section>
 
     <section v-else class="space-y-3">
@@ -210,16 +115,7 @@ watch(
             </span>
           </p>
 
-          <NuxtLink
-            v-if="getArtistRoute(event)"
-            :to="getArtistRoute(event) || ''"
-            class="mt-3 inline-block text-xs font-medium text-sky-400 hover:text-sky-300"
-          >
-            View show + setlist history
-          </NuxtLink>
-          <p v-else class="mt-3 text-xs text-slate-500">
-            Artist history unavailable for this event.
-          </p>
+          <ShowSetlistButton :to="getArtistRoute(event)" />
         </article>
       </div>
     </section>

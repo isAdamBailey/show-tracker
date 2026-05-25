@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import SetlistAccordion from '../../components/SetlistAccordion.vue'
 import { useMusicCacheStore } from '../../stores/music-cache'
-import { filterEventsWithinRadius, resolveCityFallback, resolveSearchCenter } from '../../utils/location'
 import type {
   SetlistHistoryProxyResponse,
   SetlistItem,
@@ -41,6 +40,17 @@ const artistNameFromQuery = computed<string>(() => {
   return decodeURIComponent(value)
 })
 
+const cityFromQuery = computed<string>(() => {
+  const value = route.query.city
+  if (Array.isArray(value)) {
+    return decodeURIComponent(value[0] ?? '')
+  }
+  if (typeof value !== 'string') {
+    return ''
+  }
+  return decodeURIComponent(value)
+})
+
 const normalizeEvents = (response: TmDiscoveryProxyResponse): TicketmasterEvent[] => {
   return response._embedded.events
 }
@@ -50,7 +60,7 @@ const normalizeSetlists = (response: SetlistHistoryProxyResponse): SetlistItem[]
 }
 
 const { data, pending, refresh } = await useAsyncData<ShowPagePayload>(
-  () => `show-page:${eventId.value}:${artistNameFromQuery.value}`,
+  () => `show-page:${eventId.value}:${artistNameFromQuery.value}:${cityFromQuery.value}`,
   async () => {
     if (!artistNameFromQuery.value) {
       return {
@@ -64,10 +74,14 @@ const { data, pending, refresh } = await useAsyncData<ShowPagePayload>(
     const cachedUpcoming = cacheStore.getArtistUpcoming(artistNameFromQuery.value)
     const cachedSetlists = cacheStore.getSetlistHistory(artistNameFromQuery.value)
 
+    const discoveryKeyword = cityFromQuery.value
+      ? `${artistNameFromQuery.value} ${cityFromQuery.value}`
+      : artistNameFromQuery.value
+
     const upcomingPromise = cachedUpcoming
       ? Promise.resolve<TicketmasterEvent[]>(cachedUpcoming)
       : $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
-          query: { keyword: artistNameFromQuery.value }
+          query: { keyword: discoveryKeyword }
         }).then((response) => normalizeEvents(response))
 
     const setlistPromise = cachedSetlists
@@ -95,24 +109,15 @@ const { data, pending, refresh } = await useAsyncData<ShowPagePayload>(
       setlistError: setlistResult.status === 'rejected' ? String(setlistResult.reason) : null
     }
   },
-  { watch: [eventId, artistNameFromQuery] }
+  { watch: [eventId, artistNameFromQuery, cityFromQuery] }
 )
 
 const upcomingEvents = computed<TicketmasterEvent[]>(() => data.value?.upcomingEvents ?? [])
-const nearbyUpcomingEvents = computed<TicketmasterEvent[]>(() => {
-  const localCenter = resolveSearchCenter(cacheStore.location)
-  const fallbackCity = resolveCityFallback(cacheStore.location)
-  return filterEventsWithinRadius(upcomingEvents.value, localCenter, 100, fallbackCity)
-})
 const setlists = computed<SetlistItem[]>(() => data.value?.setlists ?? [])
 const upcomingError = computed<string | null>(() => data.value?.upcomingError ?? null)
 const setlistError = computed<string | null>(() => data.value?.setlistError ?? null)
 
 const selectedEvent = computed<TicketmasterEvent | null>(() => {
-  const nearbyMatch = nearbyUpcomingEvents.value.find((event) => event.id === eventId.value)
-  if (nearbyMatch) {
-    return nearbyMatch
-  }
   return upcomingEvents.value.find((event) => event.id === eventId.value) ?? null
 })
 
@@ -129,7 +134,10 @@ const partialFailure = computed<boolean>(
       <h1 class="text-3xl font-semibold tracking-tight text-slate-100">
         {{ artistNameFromQuery || 'Show Details' }}
       </h1>
-      <p class="text-sm text-slate-400">Selected show info with historical setlist data.</p>
+      <p class="text-sm text-slate-400">
+        Selected show info with historical setlist data
+        <span v-if="cityFromQuery">for {{ cityFromQuery }}</span>.
+      </p>
     </header>
 
     <section

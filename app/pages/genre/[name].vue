@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import ShowSetlistButton from '../../components/ShowSetlistButton.vue'
 import { useMusicCacheStore } from '../../stores/music-cache'
-import {
-  filterEventsWithinRadius,
-  resolveCityFallback,
-  resolveSearchCenter
-} from '../../utils/location'
 import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../../types/music'
-import type { LocationState } from '../../stores/music-cache'
 
 const route = useRoute()
 const musicCacheStore = useMusicCacheStore()
@@ -26,80 +21,41 @@ const rawGenreParam = computed<string>(() => {
 })
 
 const classificationName = computed<string>(() => decodeURIComponent(rawGenreParam.value))
+const cityFromQuery = computed<string>(() => {
+  const value = route.query.city
+  if (Array.isArray(value)) {
+    return decodeURIComponent(value[0] ?? '')
+  }
+  if (typeof value !== 'string') {
+    return ''
+  }
+  return decodeURIComponent(value)
+})
 
 const getArtistNameFromEvent = (event: TicketmasterEvent): string | null => {
   const artistName = event._embedded?.attractions?.[0]?.name
   return artistName ?? null
 }
 
-const buildDiscoveryQuery = (
-  genre: string,
-  location: LocationState
-): { classificationName: string; geoPoint?: string; dmaId?: string } => {
-  if (location.selectedCity === 'portland') {
-    return {
-      classificationName: genre,
-      dmaId: '37'
-    }
-  }
+const buildDiscoveryQuery = (genre: string): { classificationName: string; dmaId: string } => ({
+  classificationName: genre,
+  dmaId: '37'
+})
 
-  if (location.source === 'geoPoint' && location.geoPoint) {
-    return {
-      classificationName: genre,
-      geoPoint: location.geoPoint
-    }
-  }
+const buildKeywordFallbackQuery = (term: string): { keyword: string } => ({
+  keyword: term
+})
 
-  if (location.dmaId) {
-    return {
-      classificationName: genre,
-      dmaId: location.dmaId
-    }
-  }
-
-  return {
-    classificationName: genre,
-    dmaId: '37'
-  }
-}
-
-const buildKeywordFallbackQuery = (
-  genre: string,
-  location: LocationState
-): { keyword: string; geoPoint?: string; dmaId?: string } => {
-  if (location.selectedCity === 'portland') {
-    return {
-      keyword: genre,
-      dmaId: '37'
-    }
-  }
-
-  if (location.source === 'geoPoint' && location.geoPoint) {
-    return {
-      keyword: genre,
-      geoPoint: location.geoPoint
-    }
-  }
-
-  if (location.dmaId) {
-    return {
-      keyword: genre,
-      dmaId: location.dmaId
-    }
-  }
-
-  return {
-    keyword: genre,
-    dmaId: '37'
-  }
-}
-
-const goToShow = async (event: TicketmasterEvent): Promise<void> => {
+const getShowRoute = (event: TicketmasterEvent): string | null => {
   const artistName = getArtistNameFromEvent(event)
   if (!artistName) {
-    return
+    return null
   }
-  await navigateTo(`/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(artistName)}`)
+  const basePath = `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(artistName)}`
+  if (!cityFromQuery.value) {
+    return basePath
+  }
+  return `${basePath}&city=${encodeURIComponent(cityFromQuery.value)}`
 }
 
 const fetchGenreEvents = async (): Promise<void> => {
@@ -115,22 +71,33 @@ const fetchGenreEvents = async (): Promise<void> => {
     return
   }
 
-  const cachedEvents = musicCacheStore.getGenreDiscovery(genre)
+  const cacheKey = cityFromQuery.value ? `${genre}::${cityFromQuery.value}` : genre
+  const cachedEvents = musicCacheStore.getGenreDiscovery(cacheKey)
   if (cachedEvents && cachedEvents.length > 0) {
-    const localCenter = resolveSearchCenter(musicCacheStore.location)
-    const fallbackCity = resolveCityFallback(musicCacheStore.location)
-    events.value = filterEventsWithinRadius(cachedEvents, localCenter, 100, fallbackCity)
+    events.value = cachedEvents
     loading.value = false
     return
   }
 
   try {
-    const query = buildDiscoveryQuery(genre, musicCacheStore.location)
-    const classificationResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', { query })
-    let discoveryEvents = classificationResponse._embedded.events
+    const cityKeyword = cityFromQuery.value ? `${genre} ${cityFromQuery.value}` : genre
+    let discoveryEvents: TicketmasterEvent[] = []
+
+    if (cityFromQuery.value) {
+      const cityQuery = buildKeywordFallbackQuery(cityKeyword)
+      const cityResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
+        query: cityQuery
+      })
+      discoveryEvents = cityResponse._embedded.events
+      usedKeywordFallback.value = true
+    } else {
+      const query = buildDiscoveryQuery(genre)
+      const classificationResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', { query })
+      discoveryEvents = classificationResponse._embedded.events
+    }
 
     if (discoveryEvents.length === 0) {
-      const keywordQuery = buildKeywordFallbackQuery(genre, musicCacheStore.location)
+      const keywordQuery = buildKeywordFallbackQuery(genre)
       const keywordResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
         query: keywordQuery
       })
@@ -138,12 +105,8 @@ const fetchGenreEvents = async (): Promise<void> => {
       usedKeywordFallback.value = true
     }
 
-    const localCenter = resolveSearchCenter(musicCacheStore.location)
-    const fallbackCity = resolveCityFallback(musicCacheStore.location)
-    const nearbyEvents = filterEventsWithinRadius(discoveryEvents, localCenter, 100, fallbackCity)
-    const displayEvents = nearbyEvents.length > 0 ? nearbyEvents : discoveryEvents
-    events.value = displayEvents
-    musicCacheStore.setGenreDiscovery(genre, displayEvents)
+    events.value = discoveryEvents
+    musicCacheStore.setGenreDiscovery(cacheKey, discoveryEvents)
   } catch {
     events.value = []
     errorMessage.value = 'Unable to load genre events right now.'
@@ -159,6 +122,10 @@ onMounted(async () => {
 watch(classificationName, async () => {
   await fetchGenreEvents()
 })
+
+watch(cityFromQuery, async () => {
+  await fetchGenreEvents()
+})
 </script>
 
 <template>
@@ -166,6 +133,7 @@ watch(classificationName, async () => {
     <header class="space-y-1">
       <h1 class="text-3xl font-semibold tracking-tight text-slate-100">
         Genre: {{ classificationName || 'Unknown' }}
+        <span v-if="cityFromQuery"> in {{ cityFromQuery }}</span>
       </h1>
       <p class="text-sm text-slate-400">
         Upcoming events discovered by Ticketmaster classification.
@@ -203,19 +171,16 @@ watch(classificationName, async () => {
     <section v-else class="space-y-3">
       <h2 class="text-xl font-medium text-slate-100">Genre Events</h2>
       <p v-if="usedKeywordFallback" class="text-xs text-amber-300">
-        No direct classification matches found. Showing keyword-based matches instead.
+        <span v-if="cityFromQuery">
+          Showing keyword-based matches for {{ classificationName }} in {{ cityFromQuery }}.
+        </span>
+        <span v-else>No direct classification matches found. Showing keyword-based matches instead.</span>
       </p>
       <div class="grid gap-3 md:grid-cols-2">
         <article
           v-for="event in events"
           :key="event.id"
-          class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 transition"
-          :class="
-            getArtistNameFromEvent(event)
-              ? 'cursor-pointer hover:border-slate-600 hover:bg-slate-900'
-              : 'cursor-not-allowed opacity-80'
-          "
-          @click="goToShow(event)"
+          class="rounded-lg border border-slate-800 bg-slate-900/60 p-4"
         >
           <h3 class="text-base font-medium text-slate-100">{{ event.name }}</h3>
           <p class="mt-1 text-sm text-slate-300">
@@ -231,12 +196,7 @@ watch(classificationName, async () => {
               , {{ event._embedded?.venues?.[0]?.country?.name }}
             </span>
           </p>
-          <p v-if="getArtistNameFromEvent(event)" class="mt-3 text-xs font-medium text-sky-400">
-            View show + setlist history
-          </p>
-          <p v-else class="mt-3 text-xs text-slate-500">
-            Artist unavailable from Ticketmaster event data
-          </p>
+          <ShowSetlistButton :to="getShowRoute(event)" />
         </article>
       </div>
     </section>

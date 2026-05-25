@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import CitySelector from './components/CitySelector.vue'
 import GlobalSearch from './components/GlobalSearch.vue'
+
+const currentYear = new Date().getFullYear()
 </script>
 
 <template>
@@ -20,10 +21,7 @@ import GlobalSearch from './components/GlobalSearch.vue'
             Live Music Tracker
           </NuxtLink>
         </div>
-        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <GlobalSearch />
-          <CitySelector />
-        </div>
+        <GlobalSearch />
       </div>
     </header>
 
@@ -34,5 +32,19 @@ import GlobalSearch from './components/GlobalSearch.vue'
     >
       <NuxtPage />
     </div>
+
+    <footer class="border-t border-slate-800 bg-slate-950/95">
+      <div class="mx-auto max-w-6xl px-4 py-4 text-center text-xs text-slate-400">
+        Copyright {{ currentYear }} ·
+        <a
+          href="https://adambailey.io"
+          target="_blank"
+          rel="noreferrer noopener"
+          class="text-sky-400 hover:text-sky-300"
+        >
+          Adam Bailey
+        </a>
+      </div>
+    </footer>
   </div>
 </template>
