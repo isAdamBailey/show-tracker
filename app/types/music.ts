@@ -2,6 +2,10 @@ export interface TicketmasterVenue {
   name?: string
   city?: { name?: string }
   country?: { name?: string }
+  location?: {
+    latitude?: string
+    longitude?: string
+  }
 }
 
 export interface TicketmasterAttraction {
@@ -35,6 +39,39 @@ export interface TmDiscoveryProxyResponse {
   _embedded: {
     events: TicketmasterEvent[]
   }
+}
+
+export interface TicketmasterClassificationValue {
+  name?: string
+}
+
+export interface TicketmasterNestedGenre {
+  name?: string
+  _embedded?: {
+    subgenres?: TicketmasterNestedGenre[]
+  }
+}
+
+export interface TicketmasterClassificationSegment {
+  _embedded?: {
+    genres?: TicketmasterNestedGenre[]
+  }
+}
+
+export interface TicketmasterClassification {
+  segment?: TicketmasterClassificationValue & TicketmasterClassificationSegment
+  genre?: TicketmasterClassificationValue
+  subGenre?: TicketmasterClassificationValue
+}
+
+export interface TicketmasterClassificationsResponse {
+  _embedded?: {
+    classifications?: TicketmasterClassification[]
+  }
+}
+
+export interface TmClassificationListResponse {
+  genres: string[]
 }
 
 export interface SetlistArtist {

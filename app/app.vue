@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CitySelector from './components/CitySelector.vue'
 import GlobalSearch from './components/GlobalSearch.vue'
 </script>
 
@@ -19,7 +20,10 @@ import GlobalSearch from './components/GlobalSearch.vue'
             Live Music Tracker
           </NuxtLink>
         </div>
-        <GlobalSearch />
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <GlobalSearch />
+          <CitySelector />
+        </div>
       </div>
     </header>
 

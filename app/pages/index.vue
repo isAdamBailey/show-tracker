@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { encode as encodeGeoHash } from 'ngeohash'
 import { useMusicCacheStore, type LocationPermissionState } from '../stores/music-cache'
+import { filterEventsWithinRadius, resolveCityFallback, resolveSearchCenter } from '../utils/location'
 import type { LocalDiscoveryLookup } from '../utils/query-keys'
 import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../types/music'
 
@@ -29,6 +30,9 @@ const getArtistRoute = (event: TicketmasterEvent): string | null => {
 }
 
 const getLookupLabel = (lookup: LocalDiscoveryLookup): string => {
+  if (musicCacheStore.location.selectedCity === 'portland') {
+    return 'Portland'
+  }
   if (lookup.geoPoint) {
     return 'your current location'
   }
@@ -38,12 +42,31 @@ const getLookupLabel = (lookup: LocalDiscoveryLookup): string => {
   return 'local area'
 }
 
+const getPreferredLookup = (): LocalDiscoveryLookup => {
+  if (musicCacheStore.location.selectedCity === 'portland') {
+    return { dmaId: FALLBACK_DMA_ID }
+  }
+
+  if (musicCacheStore.location.source === 'geoPoint' && musicCacheStore.location.geoPoint) {
+    return { geoPoint: musicCacheStore.location.geoPoint }
+  }
+
+  if (musicCacheStore.location.dmaId) {
+    return { dmaId: musicCacheStore.location.dmaId }
+  }
+
+  return { dmaId: FALLBACK_DMA_ID }
+}
+
 const fetchLocalEvents = async (lookup: LocalDiscoveryLookup): Promise<void> => {
+  const effectiveLookup =
+    musicCacheStore.location.selectedCity === 'portland' ? { dmaId: FALLBACK_DMA_ID } : lookup
+
   loading.value = true
   errorMessage.value = null
-  activeLookup.value = lookup
+  activeLookup.value = effectiveLookup
 
-  const cachedEvents = musicCacheStore.getLocalDiscovery(lookup)
+  const cachedEvents = musicCacheStore.getLocalDiscovery(effectiveLookup)
   if (cachedEvents) {
     events.value = cachedEvents
     loading.value = false
@@ -51,13 +74,15 @@ const fetchLocalEvents = async (lookup: LocalDiscoveryLookup): Promise<void> => 
   }
 
   try {
-    const query = lookup.geoPoint
-      ? { geoPoint: lookup.geoPoint }
-      : { dmaId: lookup.dmaId ?? FALLBACK_DMA_ID }
+    const query = effectiveLookup.geoPoint
+      ? { geoPoint: effectiveLookup.geoPoint }
+      : { dmaId: effectiveLookup.dmaId ?? FALLBACK_DMA_ID }
     const response = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', { query })
-    const fetchedEvents = response._embedded.events
-    events.value = fetchedEvents
-    musicCacheStore.setLocalDiscovery(lookup, fetchedEvents)
+    const localCenter = resolveSearchCenter(musicCacheStore.location)
+    const fallbackCity = resolveCityFallback(musicCacheStore.location)
+    const nearbyEvents = filterEventsWithinRadius(response._embedded.events, localCenter, 100, fallbackCity)
+    events.value = nearbyEvents
+    musicCacheStore.setLocalDiscovery(effectiveLookup, nearbyEvents)
   } catch {
     events.value = []
     errorMessage.value = 'Unable to load local events right now.'
@@ -98,7 +123,11 @@ const requestGeolocation = async (): Promise<void> => {
       position.coords.longitude,
       EVENT_GEOHASH_PRECISION
     )
-    musicCacheStore.setLocationByGeoPoint(geoPoint)
+    musicCacheStore.setLocationByGeoPoint(
+      geoPoint,
+      position.coords.latitude,
+      position.coords.longitude
+    )
     await fetchLocalEvents({ geoPoint })
   } catch (error: unknown) {
     if (isPermissionDeniedError(error)) {
@@ -112,6 +141,13 @@ const requestGeolocation = async (): Promise<void> => {
 onMounted(async () => {
   await requestGeolocation()
 })
+
+watch(
+  () => musicCacheStore.location.selectedCity,
+  async () => {
+    await fetchLocalEvents(getPreferredLookup())
+  }
+)
 </script>
 
 <template>

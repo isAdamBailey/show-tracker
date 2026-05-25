@@ -19,13 +19,19 @@ export interface LocationState {
   geoPoint: string | null
   dmaId: string | null
   permission: LocationPermissionState
+  latitude: number | null
+  longitude: number | null
+  selectedCity: string | null
 }
 
 const emptyLocationState = (): LocationState => ({
   source: null,
   geoPoint: null,
   dmaId: null,
-  permission: 'idle'
+  permission: 'idle',
+  latitude: null,
+  longitude: null,
+  selectedCity: null
 })
 
 export const useMusicCacheStore = defineStore('music-cache', () => {
@@ -36,12 +42,15 @@ export const useMusicCacheStore = defineStore('music-cache', () => {
   const artistUpcomingCache = ref<EventCache>({})
   const setlistHistoryCache = ref<SetlistCache>({})
 
-  const setLocationByGeoPoint = (geoPoint: string): void => {
+  const setLocationByGeoPoint = (geoPoint: string, latitude: number, longitude: number): void => {
     location.value = {
       source: 'geoPoint',
       geoPoint,
       dmaId: null,
-      permission: 'granted'
+      permission: 'granted',
+      latitude,
+      longitude,
+      selectedCity: location.value.selectedCity
     }
   }
 
@@ -50,12 +59,20 @@ export const useMusicCacheStore = defineStore('music-cache', () => {
       source: 'dmaId',
       geoPoint: null,
       dmaId,
-      permission
+      permission,
+      latitude: null,
+      longitude: null,
+      selectedCity: location.value.selectedCity
     }
   }
 
   const setLocationPermission = (permission: LocationPermissionState): void => {
     location.value.permission = permission
+  }
+
+  const setSelectedCity = (city: string | null): void => {
+    location.value.selectedCity = city
+    clearSessionCaches()
   }
 
   const getLocalDiscovery = (lookup: LocalDiscoveryLookup): TicketmasterEvent[] | undefined => {
@@ -119,6 +136,7 @@ export const useMusicCacheStore = defineStore('music-cache', () => {
     setLocationByGeoPoint,
     setLocationByDmaId,
     setLocationPermission,
+    setSelectedCity,
     getLocalDiscovery,
     setLocalDiscovery,
     getGenreDiscovery,

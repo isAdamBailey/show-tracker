@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useMusicCacheStore } from '../../stores/music-cache'
+import {
+  filterEventsWithinRadius,
+  resolveCityFallback,
+  resolveSearchCenter
+} from '../../utils/location'
 import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../../types/music'
+import type { LocationState } from '../../stores/music-cache'
 
 const route = useRoute()
 const musicCacheStore = useMusicCacheStore()
@@ -9,6 +15,7 @@ const musicCacheStore = useMusicCacheStore()
 const events = ref<TicketmasterEvent[]>([])
 const loading = ref<boolean>(true)
 const errorMessage = ref<string | null>(null)
+const usedKeywordFallback = ref<boolean>(false)
 
 const rawGenreParam = computed<string>(() => {
   const value = route.params.name
@@ -25,6 +32,68 @@ const getArtistNameFromEvent = (event: TicketmasterEvent): string | null => {
   return artistName ?? null
 }
 
+const buildDiscoveryQuery = (
+  genre: string,
+  location: LocationState
+): { classificationName: string; geoPoint?: string; dmaId?: string } => {
+  if (location.selectedCity === 'portland') {
+    return {
+      classificationName: genre,
+      dmaId: '37'
+    }
+  }
+
+  if (location.source === 'geoPoint' && location.geoPoint) {
+    return {
+      classificationName: genre,
+      geoPoint: location.geoPoint
+    }
+  }
+
+  if (location.dmaId) {
+    return {
+      classificationName: genre,
+      dmaId: location.dmaId
+    }
+  }
+
+  return {
+    classificationName: genre,
+    dmaId: '37'
+  }
+}
+
+const buildKeywordFallbackQuery = (
+  genre: string,
+  location: LocationState
+): { keyword: string; geoPoint?: string; dmaId?: string } => {
+  if (location.selectedCity === 'portland') {
+    return {
+      keyword: genre,
+      dmaId: '37'
+    }
+  }
+
+  if (location.source === 'geoPoint' && location.geoPoint) {
+    return {
+      keyword: genre,
+      geoPoint: location.geoPoint
+    }
+  }
+
+  if (location.dmaId) {
+    return {
+      keyword: genre,
+      dmaId: location.dmaId
+    }
+  }
+
+  return {
+    keyword: genre,
+    dmaId: '37'
+  }
+}
+
 const goToShow = async (event: TicketmasterEvent): Promise<void> => {
   const artistName = getArtistNameFromEvent(event)
   if (!artistName) {
@@ -36,6 +105,7 @@ const goToShow = async (event: TicketmasterEvent): Promise<void> => {
 const fetchGenreEvents = async (): Promise<void> => {
   loading.value = true
   errorMessage.value = null
+  usedKeywordFallback.value = false
 
   const genre = classificationName.value.trim()
   if (!genre) {
@@ -46,19 +116,34 @@ const fetchGenreEvents = async (): Promise<void> => {
   }
 
   const cachedEvents = musicCacheStore.getGenreDiscovery(genre)
-  if (cachedEvents) {
-    events.value = cachedEvents
+  if (cachedEvents && cachedEvents.length > 0) {
+    const localCenter = resolveSearchCenter(musicCacheStore.location)
+    const fallbackCity = resolveCityFallback(musicCacheStore.location)
+    events.value = filterEventsWithinRadius(cachedEvents, localCenter, 100, fallbackCity)
     loading.value = false
     return
   }
 
   try {
-    const response = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
-      query: { classificationName: genre }
-    })
-    const fetchedEvents = response._embedded.events
-    events.value = fetchedEvents
-    musicCacheStore.setGenreDiscovery(genre, fetchedEvents)
+    const query = buildDiscoveryQuery(genre, musicCacheStore.location)
+    const classificationResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', { query })
+    let discoveryEvents = classificationResponse._embedded.events
+
+    if (discoveryEvents.length === 0) {
+      const keywordQuery = buildKeywordFallbackQuery(genre, musicCacheStore.location)
+      const keywordResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
+        query: keywordQuery
+      })
+      discoveryEvents = keywordResponse._embedded.events
+      usedKeywordFallback.value = true
+    }
+
+    const localCenter = resolveSearchCenter(musicCacheStore.location)
+    const fallbackCity = resolveCityFallback(musicCacheStore.location)
+    const nearbyEvents = filterEventsWithinRadius(discoveryEvents, localCenter, 100, fallbackCity)
+    const displayEvents = nearbyEvents.length > 0 ? nearbyEvents : discoveryEvents
+    events.value = displayEvents
+    musicCacheStore.setGenreDiscovery(genre, displayEvents)
   } catch {
     events.value = []
     errorMessage.value = 'Unable to load genre events right now.'
@@ -117,6 +202,9 @@ watch(classificationName, async () => {
 
     <section v-else class="space-y-3">
       <h2 class="text-xl font-medium text-slate-100">Genre Events</h2>
+      <p v-if="usedKeywordFallback" class="text-xs text-amber-300">
+        No direct classification matches found. Showing keyword-based matches instead.
+      </p>
       <div class="grid gap-3 md:grid-cols-2">
         <article
           v-for="event in events"

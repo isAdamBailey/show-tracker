@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import SetlistAccordion from '../../components/SetlistAccordion.vue'
 import { useMusicCacheStore } from '../../stores/music-cache'
+import { filterEventsWithinRadius, resolveCityFallback, resolveSearchCenter } from '../../utils/location'
 import type {
   SetlistHistoryProxyResponse,
   SetlistItem,
@@ -98,11 +99,20 @@ const { data, pending, refresh } = await useAsyncData<ShowPagePayload>(
 )
 
 const upcomingEvents = computed<TicketmasterEvent[]>(() => data.value?.upcomingEvents ?? [])
+const nearbyUpcomingEvents = computed<TicketmasterEvent[]>(() => {
+  const localCenter = resolveSearchCenter(cacheStore.location)
+  const fallbackCity = resolveCityFallback(cacheStore.location)
+  return filterEventsWithinRadius(upcomingEvents.value, localCenter, 100, fallbackCity)
+})
 const setlists = computed<SetlistItem[]>(() => data.value?.setlists ?? [])
 const upcomingError = computed<string | null>(() => data.value?.upcomingError ?? null)
 const setlistError = computed<string | null>(() => data.value?.setlistError ?? null)
 
 const selectedEvent = computed<TicketmasterEvent | null>(() => {
+  const nearbyMatch = nearbyUpcomingEvents.value.find((event) => event.id === eventId.value)
+  if (nearbyMatch) {
+    return nearbyMatch
+  }
   return upcomingEvents.value.find((event) => event.id === eventId.value) ?? null
 })
 
