@@ -2,6 +2,8 @@
 
 Nuxt 4 app for discovering live events and viewing historical setlists.
 
+[![Laravel Forge Site Deployment Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fforge.laravel.com%2Fsite-badges%2F2cf2e96a-40e8-4298-ac3e-b839b945170b%3Flabel%3D1&style=flat-square)](https://forge.laravel.com/adam-f6w/adambaileyio/3211818)
+
 ## Stack
 
 - Nuxt 4 + Vue 3 (`<script setup>` + TypeScript)
