@@ -1,0 +1,33 @@
+{
+  "name": "live-music-tracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.11.3",
+    "@vueuse/motion": "^3.0.3",
+    "ngeohash": "^0.6.3",
+    "nuxt": "^4.0.3",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.17"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.9.0",
+    "@types/ngeohash": "^0.6.8",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.7.1",
+    "typescript": "^5.8.3"
+  }
+}
