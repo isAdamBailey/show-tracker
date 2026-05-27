@@ -5,9 +5,9 @@ import { useMusicCacheStore } from '../../stores/music-cache'
 import type {
   SetlistHistoryProxyResponse,
   SetlistItem,
-  TicketmasterEvent,
-  TmDiscoveryProxyResponse
+  TicketmasterEvent
 } from '../../types/music'
+import { fetchMergedArtistEvents, getEventListingLabel } from '../../utils/events'
 
 interface ShowPagePayload {
   upcomingEvents: TicketmasterEvent[]
@@ -51,10 +51,6 @@ const cityFromQuery = computed<string>(() => {
   return decodeURIComponent(value)
 })
 
-const normalizeEvents = (response: TmDiscoveryProxyResponse): TicketmasterEvent[] => {
-  return response._embedded.events
-}
-
 const normalizeSetlists = (response: SetlistHistoryProxyResponse): SetlistItem[] => {
   return response.setlist
 }
@@ -74,15 +70,9 @@ const { data, pending, refresh } = await useAsyncData<ShowPagePayload>(
     const cachedUpcoming = cacheStore.getArtistUpcoming(artistNameFromQuery.value)
     const cachedSetlists = cacheStore.getSetlistHistory(artistNameFromQuery.value)
 
-    const discoveryKeyword = cityFromQuery.value
-      ? `${artistNameFromQuery.value} ${cityFromQuery.value}`
-      : artistNameFromQuery.value
-
     const upcomingPromise = cachedUpcoming
       ? Promise.resolve<TicketmasterEvent[]>(cachedUpcoming)
-      : $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
-          query: { keyword: discoveryKeyword }
-        }).then((response) => normalizeEvents(response))
+      : fetchMergedArtistEvents(artistNameFromQuery.value, cityFromQuery.value || undefined)
 
     const setlistPromise = cachedSetlists
       ? Promise.resolve<SetlistItem[]>(cachedSetlists)
@@ -209,11 +199,11 @@ const partialFailure = computed<boolean>(
             rel="noreferrer noopener"
             class="mt-3 inline-block text-xs font-medium text-sky-400 hover:text-sky-300"
           >
-            Open event listing
+            {{ getEventListingLabel(selectedEvent) }}
           </a>
         </template>
         <p v-else class="mt-4 text-sm text-slate-400">
-          The selected show was not found in current Ticketmaster results.
+          The selected show was not found in current Ticketmaster or SeatGeek results.
         </p>
       </article>
 

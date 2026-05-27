@@ -4,7 +4,8 @@ export default defineNuxtConfig({
   css: ['~/assets/css/tailwind.css'],
   runtimeConfig: {
     ticketmasterApiKey: process.env.TICKETMASTER_API_KEY,
-    setlistFmKey: process.env.SETLIST_FM_KEY
+    setlistFmKey: process.env.SETLIST_FM_KEY,
+    seatgeekClientId: process.env.SEATGEEK_CLIENT_ID
   },
   compatibilityDate: '2026-05-25'
 })

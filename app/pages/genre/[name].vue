@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import ShowSetlistButton from '../../components/ShowSetlistButton.vue'
 import { useMusicCacheStore } from '../../stores/music-cache'
 import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../../types/music'
+import { fetchMergedGenreEvents, getArtistNameFromEvent } from '../../utils/events'
 
 const route = useRoute()
 const musicCacheStore = useMusicCacheStore()
@@ -32,9 +33,8 @@ const cityFromQuery = computed<string>(() => {
   return decodeURIComponent(value)
 })
 
-const getArtistNameFromEvent = (event: TicketmasterEvent): string | null => {
-  const artistName = event._embedded?.attractions?.[0]?.name
-  return artistName ?? null
+const getArtistNameFromEventForRoute = (event: TicketmasterEvent): string | null => {
+  return getArtistNameFromEvent(event)
 }
 
 const buildDiscoveryQuery = (genre: string): { classificationName: string; dmaId: string } => ({
@@ -47,7 +47,7 @@ const buildKeywordFallbackQuery = (term: string): { keyword: string } => ({
 })
 
 const getShowRoute = (event: TicketmasterEvent): string | null => {
-  const artistName = getArtistNameFromEvent(event)
+  const artistName = getArtistNameFromEventForRoute(event)
   if (!artistName) {
     return null
   }
@@ -81,32 +81,41 @@ const fetchGenreEvents = async (): Promise<void> => {
 
   try {
     const cityKeyword = cityFromQuery.value ? `${genre} ${cityFromQuery.value}` : genre
-    let discoveryEvents: TicketmasterEvent[] = []
 
-    if (cityFromQuery.value) {
-      const cityQuery = buildKeywordFallbackQuery(cityKeyword)
-      const cityResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
-        query: cityQuery
-      })
-      discoveryEvents = cityResponse._embedded.events
-      usedKeywordFallback.value = true
-    } else {
-      const query = buildDiscoveryQuery(genre)
-      const classificationResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', { query })
-      discoveryEvents = classificationResponse._embedded.events
+    const fetchTicketmasterGenreEvents = async (): Promise<TicketmasterEvent[]> => {
+      let discoveryEvents: TicketmasterEvent[] = []
+
+      if (cityFromQuery.value) {
+        const cityQuery = buildKeywordFallbackQuery(cityKeyword)
+        const cityResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
+          query: cityQuery
+        })
+        discoveryEvents = cityResponse._embedded.events
+        usedKeywordFallback.value = true
+      } else {
+        const query = buildDiscoveryQuery(genre)
+        const classificationResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', { query })
+        discoveryEvents = classificationResponse._embedded.events
+      }
+
+      if (discoveryEvents.length === 0) {
+        const keywordQuery = buildKeywordFallbackQuery(genre)
+        const keywordResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
+          query: keywordQuery
+        })
+        discoveryEvents = keywordResponse._embedded.events
+        usedKeywordFallback.value = true
+      }
+
+      return discoveryEvents
     }
 
-    if (discoveryEvents.length === 0) {
-      const keywordQuery = buildKeywordFallbackQuery(genre)
-      const keywordResponse = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
-        query: keywordQuery
-      })
-      discoveryEvents = keywordResponse._embedded.events
-      usedKeywordFallback.value = true
-    }
-
-    events.value = discoveryEvents
-    musicCacheStore.setGenreDiscovery(cacheKey, discoveryEvents)
+    events.value = await fetchMergedGenreEvents(
+      fetchTicketmasterGenreEvents,
+      genre,
+      cityFromQuery.value || undefined
+    )
+    musicCacheStore.setGenreDiscovery(cacheKey, events.value)
   } catch {
     events.value = []
     errorMessage.value = 'Unable to load genre events right now.'
@@ -136,7 +145,7 @@ watch(cityFromQuery, async () => {
         <span v-if="cityFromQuery"> in {{ cityFromQuery }}</span>
       </h1>
       <p class="text-sm text-slate-400">
-        Upcoming events discovered by Ticketmaster classification.
+        Upcoming events from Ticketmaster and SeatGeek.
       </p>
     </header>
 

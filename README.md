@@ -14,9 +14,10 @@ Nuxt 4 app for discovering live events and viewing historical setlists.
 
 ## Core Data Rules
 
-- Ticketmaster Discovery is the source for event discovery.
+- Ticketmaster Discovery is the primary source for event discovery (local feed, genre classification, keyword search).
+- SeatGeek supplements artist and genre event listings when `SEATGEEK_CLIENT_ID` is configured.
 - setlist.fm is used only for historical setlists.
-- Artist handoff uses the exact Ticketmaster field:
+- Artist handoff uses the event's primary attraction name:
   - `_embedded.attractions[0].name`
 
 ## Requirements
@@ -35,12 +36,16 @@ Create a `.env` file:
 ```bash
 TICKETMASTER_API_KEY=your_ticketmaster_key
 SETLIST_FM_KEY=your_setlist_fm_key
+SEATGEEK_CLIENT_ID=your_seatgeek_client_id
 ```
+
+Register a free SeatGeek client ID at [seatgeek.com/account/develop](https://seatgeek.com/account/develop).
 
 Runtime config:
 
 - `ticketmasterApiKey` -> `TICKETMASTER_API_KEY`
 - `setlistFmKey` -> `SETLIST_FM_KEY`
+- `seatgeekClientId` -> `SEATGEEK_CLIENT_ID`
 
 ## Scripts
 
@@ -64,6 +69,12 @@ Runtime config:
 - `GET /api/tm-discovery`
   - allowed query params: `geoPoint`, `dmaId`, `keyword`, `classificationName`
   - injects Ticketmaster API key server-side
+- `GET /api/sg-artist-events`
+  - allowed query params: `artistName`, `city` (optional city filter)
+  - injects SeatGeek client ID server-side; returns empty results when not configured
+- `GET /api/sg-genre-events`
+  - allowed query params: `genre`, `city` (optional city filter)
+  - injects SeatGeek client ID server-side; returns empty results when not configured
 - `GET /api/tm-classifications`
   - returns normalized Ticketmaster genre/subgenre names for search suggestions
 - `GET /api/setlist-history`
@@ -82,6 +93,8 @@ Runtime config:
   - tries `classificationName` first (Portland DMA context)
   - falls back to `keyword` search when needed
   - with city provided, uses `keyword="<genre> <city>"`
+  - merges Ticketmaster results with SeatGeek genre/performer listings
+- Artist/show pages merge Ticketmaster keyword results with SeatGeek artist events
 
 ## UX Behavior
 
@@ -117,9 +130,12 @@ app/
   types/
     music.ts
   utils/
+    events.ts
     query-keys.ts
 server/
   api/
+    sg-artist-events.ts
+    sg-genre-events.ts
     tm-discovery.ts
     tm-classifications.ts
     setlist-history.ts

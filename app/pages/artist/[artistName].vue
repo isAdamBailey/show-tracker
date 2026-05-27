@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import ShowSetlistButton from '../../components/ShowSetlistButton.vue'
-import type { TicketmasterEvent, TmDiscoveryResponse } from '../../types/music'
+import type { TicketmasterEvent } from '../../types/music'
+import { fetchMergedArtistEvents, getArtistNameFromEvent, getEventListingLabel } from '../../utils/events'
 
 interface ArtistPagePayload {
   upcomingEvents: TicketmasterEvent[]
@@ -30,13 +31,8 @@ const cityFromQuery = computed<string>(() => {
   return decodeURIComponent(value)
 })
 
-const normalizeEvents = (response: TmDiscoveryResponse): TicketmasterEvent[] => {
-  return response._embedded?.events ?? []
-}
-
 const getEventArtistName = (event: TicketmasterEvent): string | null => {
-  const ticketmasterArtistName = event._embedded?.attractions?.[0]?.name
-  return ticketmasterArtistName ?? artistName.value
+  return getArtistNameFromEvent(event) ?? artistName.value
 }
 
 const getShowRoute = (event: TicketmasterEvent): string | null => {
@@ -54,16 +50,13 @@ const getShowRoute = (event: TicketmasterEvent): string | null => {
 const { data, pending, refresh } = await useAsyncData<ArtistPagePayload>(
   () => `artist-page:${rawArtistParam.value}:${cityFromQuery.value}`,
   async () => {
-    const keyword = cityFromQuery.value
-      ? `${artistName.value} ${cityFromQuery.value}`
-      : artistName.value
-    const encodedKeyword = encodeURIComponent(keyword)
     try {
-      const upcomingResponse = await $fetch<TmDiscoveryResponse>(
-        `/api/tm-discovery?keyword=${encodedKeyword}`
+      const upcomingEvents = await fetchMergedArtistEvents(
+        artistName.value,
+        cityFromQuery.value || undefined
       )
       return {
-        upcomingEvents: normalizeEvents(upcomingResponse),
+        upcomingEvents,
         upcomingError: null
       }
     } catch (error: unknown) {
@@ -89,7 +82,7 @@ const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value &
     <header class="space-y-1">
       <h1 class="text-3xl font-semibold tracking-tight text-slate-100">{{ artistName }}</h1>
       <p class="text-sm text-slate-400">
-        Upcoming tour dates for this artist
+        Upcoming tour dates from Ticketmaster and SeatGeek
         <span v-if="cityFromQuery">in {{ cityFromQuery }}</span>.
       </p>
     </header>
@@ -153,7 +146,7 @@ const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value &
               rel="noreferrer noopener"
               class="w-full text-center text-xs font-medium text-slate-400 hover:text-slate-300"
             >
-              Open Ticketmaster listing
+              {{ getEventListingLabel(event) }}
             </a>
           </div>
         </article>

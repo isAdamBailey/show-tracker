@@ -12,9 +12,12 @@ export interface TicketmasterAttraction {
   name: string
 }
 
+export type EventSource = 'ticketmaster' | 'seatgeek'
+
 export interface TicketmasterEvent {
   id: string
   name: string
+  source?: EventSource
   url?: string
   dates?: {
     start?: {
@@ -39,6 +42,60 @@ export interface TmDiscoveryProxyResponse {
   _embedded: {
     events: TicketmasterEvent[]
   }
+}
+
+export interface SeatGeekVenue {
+  name?: string
+  city?: string
+  state?: string
+  country?: string
+  location?: {
+    lat?: number
+    lon?: number
+  }
+}
+
+export interface SeatGeekPerformer {
+  id: number
+  name: string
+  slug?: string
+  type?: string
+  genres?: Array<{ slug?: string; name?: string }>
+}
+
+export interface SeatGeekEvent {
+  id: number
+  title: string
+  url?: string
+  datetime_local?: string
+  datetime_utc?: string
+  type?: string
+  venue?: SeatGeekVenue
+  performers?: SeatGeekPerformer[]
+}
+
+export interface SeatGeekEventsResponse {
+  events?: SeatGeekEvent[]
+  meta?: {
+    total?: number
+    per_page?: number
+    page?: number
+  }
+}
+
+export interface SeatGeekPerformersResponse {
+  performers?: SeatGeekPerformer[]
+  meta?: {
+    total?: number
+  }
+}
+
+export interface SeatGeekGenresResponse {
+  genres?: Array<{ id?: number; name?: string; slug?: string }>
+}
+
+export interface SgEventsProxyResponse {
+  events: TicketmasterEvent[]
 }
 
 export interface TicketmasterClassificationValue {

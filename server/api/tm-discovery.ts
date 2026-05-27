@@ -69,7 +69,10 @@ const getValidatedQuery = (query: Record<string, string | string[] | undefined>)
 
 const normalizeTmResponse = (response: TmDiscoveryResponse): TmDiscoveryProxyResponse => ({
   _embedded: {
-    events: response._embedded?.events ?? []
+    events: (response._embedded?.events ?? []).map((event) => ({
+      ...event,
+      source: event.source ?? 'ticketmaster'
+    }))
   }
 })
 
