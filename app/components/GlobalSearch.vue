@@ -6,19 +6,7 @@ type SearchMode = 'artist' | 'genre'
 
 const searchMode = ref<SearchMode>('artist')
 const searchValue = ref<string>('')
-const artistCity = ref<string>('Portland')
-const cityOptions = [
-  'Portland',
-  'Vancouver',
-  'Seattle',
-  'Eugene',
-  'Bend',
-  'San Francisco',
-  'Los Angeles',
-  'New York',
-  'Chicago',
-  'Austin'
-]
+const artistCity = ref<string>('')
 
 const { data: classificationData, pending: genreLoading } = await useAsyncData<TmClassificationListResponse>(
   'tm-classifications',
@@ -37,19 +25,10 @@ const normalizedGenreMap = computed<Map<string, string>>(() => {
 
 const isEmptySearch = computed<boolean>(() => searchValue.value.trim().length === 0)
 
-watch(
-  searchMode,
-  (mode) => {
-    if (mode === 'genre') {
-      searchValue.value = ''
-      artistCity.value = 'Portland'
-      return
-    }
-    searchValue.value = ''
-    artistCity.value = 'Portland'
-  },
-  { immediate: true }
-)
+watch(searchMode, () => {
+  searchValue.value = ''
+  artistCity.value = ''
+})
 
 const submitSearch = async (): Promise<void> => {
   if (isEmptySearch.value) {
@@ -101,14 +80,6 @@ const submitSearch = async (): Promise<void> => {
       placeholder="Search artist"
     >
     <input
-      v-if="searchMode === 'artist'"
-      v-model="artistCity"
-      type="text"
-      list="city-options"
-      class="w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 md:w-44"
-      placeholder="City"
-    >
-    <input
       v-else
       id="search-value"
       v-model="searchValue"
@@ -117,17 +88,7 @@ const submitSearch = async (): Promise<void> => {
       class="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20"
       :placeholder="genreLoading ? 'Loading genres...' : 'Type a genre (e.g. Punk)'"
     >
-    <input
-      v-if="searchMode === 'genre'"
-      v-model="artistCity"
-      type="text"
-      list="city-options"
-      class="w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 md:w-44"
-      placeholder="City"
-    >
-    <datalist id="city-options">
-      <option v-for="city in cityOptions" :key="city" :value="city" />
-    </datalist>
+    <CitySearchInput v-model="artistCity" />
     <datalist id="ticketmaster-genre-options">
       <option v-for="genre in genreOptions" :key="genre" :value="genre" />
     </datalist>
