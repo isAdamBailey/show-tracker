@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import ngeohash from 'ngeohash'
 import ShowSetlistButton from '../components/ShowSetlistButton.vue'
 import { useMusicCacheStore } from '../stores/music-cache'
-import type { LocalDiscoveryLookup } from '../utils/query-keys'
 import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../types/music'
 import { formatShowDate, formatShowTime, getUrgencyLabel } from '../utils/dates'
 
-const FALLBACK_DMA_ID = '37'
-const DEFAULT_LOOKUP: LocalDiscoveryLookup = { dmaId: FALLBACK_DMA_ID }
+// Portland, OR geohash — fallback when user denies geolocation
+const FALLBACK_GEOPOINT = 'c20fbr'
+const FALLBACK_LOCATION_LABEL = 'Portland/Vancouver'
+const DEFAULT_GENRE = 'Rock'
 
 const musicCacheStore = useMusicCacheStore()
 
 const events = ref<TicketmasterEvent[]>([])
 const loading = ref<boolean>(true)
 const errorMessage = ref<string | null>(null)
+const locationLabel = ref<string>(FALLBACK_LOCATION_LABEL)
 
 const getArtistNameFromEvent = (event: TicketmasterEvent): string | null => {
   return event._embedded?.attractions?.[0]?.name ?? null
@@ -25,33 +28,49 @@ const getArtistRoute = (event: TicketmasterEvent): string | null => {
   return `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(artistName)}`
 }
 
-const fetchLocalEvents = async (): Promise<void> => {
+const fetchEvents = async (geoPoint: string): Promise<void> => {
   loading.value = true
   errorMessage.value = null
 
-  const cachedEvents = musicCacheStore.getLocalDiscovery(DEFAULT_LOOKUP)
-  if (cachedEvents) {
-    events.value = cachedEvents
+  const cacheKey = `geo:${geoPoint}:genre:${DEFAULT_GENRE}`
+  const cached = musicCacheStore.getGenreDiscovery(cacheKey)
+  if (cached && cached.length > 0) {
+    events.value = cached
     loading.value = false
     return
   }
 
   try {
     const response = await $fetch<TmDiscoveryProxyResponse>('/api/tm-discovery', {
-      query: { dmaId: FALLBACK_DMA_ID }
+      query: { geoPoint, classificationName: DEFAULT_GENRE }
     })
     events.value = response._embedded.events
-    musicCacheStore.setLocalDiscovery(DEFAULT_LOOKUP, response._embedded.events)
+    musicCacheStore.setGenreDiscovery(cacheKey, response._embedded.events)
   } catch {
     events.value = []
-    errorMessage.value = 'Unable to load local events right now.'
+    errorMessage.value = 'Unable to load events right now.'
   } finally {
     loading.value = false
   }
 }
 
 onMounted(async () => {
-  await fetchLocalEvents()
+  // Load Portland data immediately so the page isn't blank while waiting for geolocation
+  await fetchEvents(FALLBACK_GEOPOINT)
+
+  if (!('geolocation' in navigator)) return
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords
+      const geoPoint = ngeohash.encode(latitude, longitude, 6)
+      if (geoPoint === FALLBACK_GEOPOINT) return
+      locationLabel.value = 'Your area'
+      await fetchEvents(geoPoint)
+    },
+    () => { /* denied — already showing Portland results */ },
+    { timeout: 6000 }
+  )
 })
 </script>
 
@@ -63,17 +82,17 @@ onMounted(async () => {
       aria-busy="true"
       aria-label="Loading upcoming shows"
     >
-      <div class="h-6 w-52 animate-pulse rounded bg-slate-800"></div>
+      <div class="h-6 w-52 animate-pulse rounded bg-slate-800"/>
       <div class="grid gap-4 md:grid-cols-2">
         <div
           v-for="i in 6"
           :key="i"
           class="space-y-3 rounded-lg border border-slate-800 bg-slate-900/60 p-4"
         >
-          <div class="h-5 w-3/4 animate-pulse rounded bg-slate-800"></div>
-          <div class="h-4 w-2/5 animate-pulse rounded bg-slate-800"></div>
-          <div class="h-3 w-3/5 animate-pulse rounded bg-slate-800"></div>
-          <div class="mt-2 h-10 w-full animate-pulse rounded-lg bg-slate-800"></div>
+          <div class="h-5 w-3/4 animate-pulse rounded bg-slate-800"/>
+          <div class="h-4 w-2/5 animate-pulse rounded bg-slate-800"/>
+          <div class="h-3 w-3/5 animate-pulse rounded bg-slate-800"/>
+          <div class="mt-2 h-10 w-full animate-pulse rounded-lg bg-slate-800"/>
         </div>
       </div>
     </section>
@@ -86,7 +105,7 @@ onMounted(async () => {
       <button
         type="button"
         class="mt-3 rounded-md bg-red-700 px-3 py-2 text-xs font-medium text-white transition hover:bg-red-600"
-        @click="fetchLocalEvents"
+        @click="fetchEvents(FALLBACK_GEOPOINT)"
       >
         Retry
       </button>
@@ -96,13 +115,13 @@ onMounted(async () => {
       v-else-if="events.length === 0"
       class="rounded-lg border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300"
     >
-      No upcoming events found for Portland/Vancouver right now.
+      No upcoming rock events found for {{ locationLabel }} right now.
     </section>
 
     <section v-else class="space-y-3">
       <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h2 class="font-display text-xl font-semibold leading-tight tracking-tight text-slate-100">Upcoming Shows</h2>
-        <p class="text-sm text-slate-400">Portland/Vancouver · {{ events.length }} events</p>
+        <h2 class="font-display text-xl font-semibold leading-tight tracking-tight text-slate-100">Rock Shows</h2>
+        <p class="text-sm text-slate-400">{{ locationLabel }} · {{ events.length }} events</p>
       </div>
       <div class="grid gap-4 md:grid-cols-2">
         <article
