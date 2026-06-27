@@ -4,6 +4,7 @@ import ShowSetlistButton from '../components/ShowSetlistButton.vue'
 import { useMusicCacheStore } from '../stores/music-cache'
 import type { LocalDiscoveryLookup } from '../utils/query-keys'
 import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../types/music'
+import { formatShowDate, formatShowTime, getUrgencyLabel } from '../utils/dates'
 
 const FALLBACK_DMA_ID = '37'
 const DEFAULT_LOOKUP: LocalDiscoveryLookup = { dmaId: FALLBACK_DMA_ID }
@@ -15,15 +16,12 @@ const loading = ref<boolean>(true)
 const errorMessage = ref<string | null>(null)
 
 const getArtistNameFromEvent = (event: TicketmasterEvent): string | null => {
-  const artistName = event._embedded?.attractions?.[0]?.name
-  return artistName ?? null
+  return event._embedded?.attractions?.[0]?.name ?? null
 }
 
 const getArtistRoute = (event: TicketmasterEvent): string | null => {
   const artistName = getArtistNameFromEvent(event)
-  if (!artistName) {
-    return null
-  }
+  if (!artistName) return null
   return `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(artistName)}`
 }
 
@@ -59,16 +57,25 @@ onMounted(async () => {
 
 <template>
   <main class="mx-auto flex max-w-6xl flex-col gap-6 p-6">
-    <header class="space-y-1">
-      <h1 class="text-3xl font-semibold tracking-tight text-slate-100">Local Upcoming Music</h1>
-      <p class="text-sm text-slate-400">Showing events for Portland/Vancouver metro.</p>
-    </header>
-
     <section
       v-if="loading"
-      class="rounded-lg border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300"
+      class="space-y-3"
+      aria-busy="true"
+      aria-label="Loading upcoming shows"
     >
-      Loading local events...
+      <div class="h-6 w-52 animate-pulse rounded bg-slate-800"></div>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div
+          v-for="i in 6"
+          :key="i"
+          class="space-y-3 rounded-lg border border-slate-800 bg-slate-900/60 p-4"
+        >
+          <div class="h-5 w-3/4 animate-pulse rounded bg-slate-800"></div>
+          <div class="h-4 w-2/5 animate-pulse rounded bg-slate-800"></div>
+          <div class="h-3 w-3/5 animate-pulse rounded bg-slate-800"></div>
+          <div class="mt-2 h-10 w-full animate-pulse rounded-lg bg-slate-800"></div>
+        </div>
+      </div>
     </section>
 
     <section
@@ -89,29 +96,41 @@ onMounted(async () => {
       v-else-if="events.length === 0"
       class="rounded-lg border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300"
     >
-      Enter an artist and optional city above to find shows.
+      No upcoming events found for Portland/Vancouver right now.
     </section>
 
     <section v-else class="space-y-3">
-      <h2 class="text-xl font-medium text-slate-100">Upcoming Events</h2>
-      <div class="grid gap-3 md:grid-cols-2">
+      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 class="font-display text-xl font-semibold leading-tight tracking-tight text-slate-100">Upcoming Shows</h2>
+        <p class="text-sm text-slate-400">Portland/Vancouver · {{ events.length }} events</p>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2">
         <article
           v-for="event in events"
           :key="event.id"
           class="rounded-lg border border-slate-800 bg-slate-900/60 p-4"
         >
-          <h3 class="text-base font-medium text-slate-100">{{ event.name }}</h3>
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="text-base font-semibold text-slate-100">{{ event.name }}</h3>
+            <span
+              v-if="event.dates?.start?.localDate && getUrgencyLabel(event.dates.start.localDate)"
+              class="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold bg-amber-500/15 text-amber-400"
+            >
+              {{ getUrgencyLabel(event.dates.start.localDate) }}
+            </span>
+          </div>
           <p class="mt-1 text-sm text-slate-300">
-            {{ event.dates?.start?.localDate ?? 'Unknown date' }}
-            <span v-if="event.dates?.start?.localTime"> • {{ event.dates.start.localTime }}</span>
+            <time
+              v-if="event.dates?.start?.localDate"
+              :datetime="event.dates.start.localDate"
+            >{{ formatShowDate(event.dates.start.localDate) }}</time>
+            <span v-else>Unknown date</span>
+            <span v-if="event.dates?.start?.localTime"> · {{ formatShowTime(event.dates.start.localTime) }}</span>
           </p>
           <p class="text-xs text-slate-400">
             {{ event._embedded?.venues?.[0]?.name ?? 'Unknown venue' }}
             <span v-if="event._embedded?.venues?.[0]?.city?.name">
-              • {{ event._embedded?.venues?.[0]?.city?.name }}
-            </span>
-            <span v-if="event._embedded?.venues?.[0]?.country?.name">
-              , {{ event._embedded?.venues?.[0]?.country?.name }}
+              · {{ event._embedded?.venues?.[0]?.city?.name }}
             </span>
           </p>
 

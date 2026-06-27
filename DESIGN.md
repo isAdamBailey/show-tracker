@@ -10,34 +10,35 @@ colors:
   monitor-mix: "#94a3b8"
   crowd-glow: "#cbd5e1"
   house-lights: "#f1f5f9"
-  pa-blue: "#38bdf8"
-  pa-blue-dim: "#0284c7"
-  deep-signal: "#082f49"
+  spotlight: "#f59e0b"
+  spotlight-bright: "#fbbf24"
+  spotlight-hover: "#fcd34d"
+  amber-depth: "#451a03"
 typography:
   display:
-    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    fontFamily: "Barlow Condensed, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.875rem"
+    fontWeight: 700
+    lineHeight: 1
+    letterSpacing: "-0.025em"
+  headline:
+    fontFamily: "Barlow Condensed, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: "-0.025em"
-  headline:
-    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 700
-    lineHeight: 1.2
-    letterSpacing: "-0.025em"
   title:
-    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-    fontSize: "1.25rem"
-    fontWeight: 500
+    fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 600
     lineHeight: 1.4
   body:
-    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 400
     lineHeight: 1.4
@@ -55,8 +56,8 @@ spacing:
   2xl: "24px"
 components:
   button-primary:
-    backgroundColor: "{colors.pa-blue-dim}"
-    textColor: "{colors.house-lights}"
+    backgroundColor: "{colors.spotlight}"
+    textColor: "#09090b"
     rounded: "{rounded.lg}"
     padding: "10px 16px"
   button-disabled:
@@ -99,7 +100,9 @@ Density is deliberate. Music fans scan for specifics: dates, venues, names. The 
 A near-black base with a single electric accent. The palette aims for the inside of a venue: dark surfaces, pools of light where information lives.
 
 ### Primary
-- **PA Blue** (`#38bdf8`): The accent. Used for links, focus rings, and interactive state indicators. Currently sky-400 — functional but too close to the generic SaaS blue accent. Future direction: something more electric, less enterprise (deep amber, warm white, or a more saturated/shifted blue-green).
+- **Spotlight** (`#f59e0b` / amber-500): The accent. Used for CTA buttons, links, focus rings, and hover states. Amber reads as concert spotlight — intentional and warm, the opposite of corporate sky-blue. Text on Spotlight buttons uses near-black (`#09090b`) for ~9.4:1 contrast.
+- **Spotlight Bright** (`#fbbf24` / amber-400): Hover state for links and button hover target.
+- **Spotlight Hover** (`#fcd34d` / amber-300): Hover text state for links (`hover:text-amber-300`).
 
 ### Neutral
 - **Stage Blackout** (`#020617`): The body background. Deep near-black, cold undertone. The stage in darkness.
@@ -112,34 +115,35 @@ A near-black base with a single electric accent. The palette aims for the inside
 - **House Lights** (`#f1f5f9`): Primary text. The brightest neutral, used for headings and label text.
 
 ### Named Rules
-**The One Accent Rule.** PA Blue (`#38bdf8`) is the only accent color in normal flow. It appears on links, focus rings, and the header gradient only. The gradient on the primary CTA button (`sky-600 → blue-600`) is a deviation from this rule and should be resolved to a flat accent on future improvement passes.
+**The One Accent Rule.** Spotlight amber (`#f59e0b`) is the only accent in normal flow. It appears on CTA buttons, links, and focus rings. No blue accents anywhere. No gradient on the CTA — flat amber, dark text, full stop.
 
-**The Anti-Slate Rule.** The cold slate palette is documented here as the current state, not the target state. Every design session should evaluate whether a given element can move toward more earned character. The dominant failure mode is "looks like every other dark-mode tool" — if it does, that element needs attention.
+**The Anti-Slate Rule.** The cold slate neutral palette is acceptable as infrastructure, but the amber accent is what gives it character. Don't reintroduce blue accents. Don't add a second accent color without strategic reason.
 
 ## 3. Typography
 
-**Display / Body Font:** System sans-serif stack (system-ui, -apple-system, Segoe UI)
-**Mono Font:** None currently in use
+**Display / Heading Font:** Barlow Condensed (wght 500–700, Google Fonts)
+**Body / UI Font:** Space Grotesk (wght 400–600, Google Fonts)
 
-**Character:** The system uses a single sans-serif family across all scales, differentiated by size, weight, and tracking. This is a functional choice, not a typographic one — the north star for a future improvement would be a custom font pairing (a compressed or condensed sans for display, a slightly more characterful body). The current system is legible and neutral; it lacks the "venue-board" character the north star calls for.
+**Character:** A condensed grotesque paired with a quirky geometric sans on the proportion axis — narrow, muscular headings against a wider, more human-feeling body. Barlow Condensed references concert posters and venue boards directly; Space Grotesk has enough personality (distinctive R, ink traps, subtle geometric quirks) to push back against the corporate system-ui void, while remaining clean enough for UI labels and card metadata.
 
 ### Hierarchy
-- **Display** (semibold 600, 1.875rem, leading-tight, -0.025em): Page titles — artist name, "Local Upcoming Music". Maximum one per page.
-- **Headline** (bold 700, 1.5rem, tight tracking): Used in the global header for the app name.
-- **Title** (medium 500, 1.25rem): Section subheadings — "Upcoming Events", "Show Info", "Historical Setlists".
-- **Body** (regular 400, 0.875rem, 1.5 leading): Main content text. Venue names, dates, descriptions. Keep to 65-75ch max for prose.
-- **Label** (regular 400, 0.75rem): Metadata — time, city, country. The smallest readable size.
+- **Display** (Barlow Condensed bold 700, 1.875rem md:3rem, leading-none, -0.025em): Page h1s — artist name, genre name, "Local Upcoming Music", app name. Maximum one per page.
+- **Headline** (Barlow Condensed semibold 600, 1.25rem, leading-tight): Section h2s — "Upcoming Events", "Show Info", "Historical Setlists", "Upcoming Tour Dates".
+- **Title** (Space Grotesk semibold 600, 1rem): Card h3 — event/show names in the discovery feed.
+- **Body** (Space Grotesk regular 400, 0.875rem, 1.5 leading): Card dates, descriptions. Slightly more leading than system-ui compensates for perceived weight loss on dark backgrounds.
+- **Label** (Space Grotesk regular 400, 0.75rem): Venue, city, country metadata. Smallest size in the system.
 
 ### Named Rules
-**The No-Uppercase Rule.** Avoid uppercase tracking (e.g., `tracking-[0.18em]` in the header "Discover Live Music" kicker). The current header uses it; future passes should remove it. The venue board doesn't shout in caps-with-tracking.
+**The Two-Family Rule.** Barlow Condensed is for headings (h1, h2) only — never on buttons, inputs, card body text, or UI labels. Space Grotesk carries everything else. The contrast axis is proportion (condensed vs. normal), not style.
+
+**The No-Uppercase Rule.** Avoid uppercase tracking as a section kicker. The venue board uses the weight of condensed type to create hierarchy, not all-caps decoration.
 
 ## 4. Elevation
 
 This system is flat-first. Cards use transparent backgrounds (`bg-slate-900/60`) rather than opaque blocks with shadow, creating depth through opacity layering rather than physical shadow. Shadows are reserved for interactive surfaces that need affordance.
 
 ### Shadow Vocabulary
-- **CTA Glow** (`shadow-md shadow-sky-900/40`): Applied to the primary button. A soft ambient halo that gives the CTA a small lift.
-- **Form Container** (`shadow-lg shadow-sky-950/30`): Applied to the search form. Separates it from the header gradient without hard edges.
+- **Form Container** (`shadow-lg shadow-zinc-950/60`): Applied to the search form. Separates it from the header gradient without hard edges.
 
 ### Named Rules
 **The Flat-by-Default Rule.** Card surfaces are flat. Shadows appear only on elements that require perceived lift: the primary CTA button, the global search form. Do not add shadow to content cards — that escalates decoration over signal.
@@ -147,7 +151,7 @@ This system is flat-first. Cards use transparent backgrounds (`bg-slate-900/60`)
 ## 5. Components
 
 ### Buttons
-- **Primary CTA:** Rounded corners (8px), gradient `sky-600 → blue-600` with `sky-500 → blue-500` on hover. White text. Full-width on cards, inline-flex centered. `shadow-md shadow-sky-900/40`. This gradient is a current-state pattern; future passes should resolve to a flat accent color for more character.
+- **Primary CTA:** Rounded corners (8px), flat `bg-amber-500` with `hover:bg-amber-400`. Dark (`zinc-950`) text for ~9.4:1 contrast. Full-width on cards, inline-flex centered. No shadow — the amber color provides sufficient affordance.
 - **Disabled / Unavailable:** `border-slate-700 bg-slate-800 text-slate-500`. No hover treatment. Communicates absence, not action.
 - **Retry button (error states):** `bg-red-700 hover:bg-red-600 text-white`. Smaller, `rounded-md`, `px-3 py-2`.
 
@@ -181,7 +185,7 @@ The signature component. A list of historical show entries that expand to reveal
 - **Do** favor type-driven hierarchy over icons and decorative elements. The information IS the design.
 
 ### Don't:
-- **Don't** use the current slate-950 + sky-blue palette as a target. It is the anti-reference ("generic SaaS dark UI"). Use this DESIGN.md as a snapshot of current state, not an endorsement. Every palette improvement session should push away from the cold slate + sky-blue family.
+- **Don't** reintroduce sky-blue or corporate blue as an accent. The accent is amber (`#f59e0b`). One voice.
 - **Don't** use `background-clip: text` with gradient backgrounds on any text element. Gradient text is decorative and never meaningful.
 - **Don't** add `border-left` greater than 1px as a colored accent stripe on cards or callouts. Use background tints, icons, or full borders instead.
 - **Don't** use uppercase tracking (e.g., `tracking-[0.18em] uppercase`) as a section kicker. The "Discover Live Music" label in the current header is an exception to clean up, not a pattern to repeat.

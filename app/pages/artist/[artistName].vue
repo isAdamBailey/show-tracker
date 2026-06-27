@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import ShowSetlistButton from '../../components/ShowSetlistButton.vue'
 import type { TicketmasterEvent } from '../../types/music'
 import { fetchMergedArtistEvents, getArtistNameFromEvent, getEventListingLabel } from '../../utils/events'
+import { formatShowDate, formatShowTime, getUrgencyLabel } from '../../utils/dates'
 
 interface ArtistPagePayload {
   upcomingEvents: TicketmasterEvent[]
@@ -80,7 +81,7 @@ const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value &
 <template>
   <main class="mx-auto flex max-w-6xl flex-col gap-6 p-6">
     <header class="space-y-1">
-      <h1 class="text-3xl font-semibold tracking-tight text-slate-100">{{ artistName }}</h1>
+      <h1 class="font-display text-3xl font-bold leading-none tracking-tight text-slate-100 text-balance">{{ artistName }}</h1>
       <p class="text-sm text-slate-400">
         Upcoming tour dates from Ticketmaster and SeatGeek
         <span v-if="cityFromQuery">in {{ cityFromQuery }}</span>.
@@ -116,25 +117,34 @@ const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value &
     </section>
 
     <section v-if="hasUpcomingData" class="space-y-3">
-      <h2 class="text-xl font-medium text-slate-100">Upcoming Tour Dates</h2>
-      <div class="grid gap-3 md:grid-cols-2">
+      <h2 class="font-display text-xl font-semibold leading-tight tracking-tight text-slate-100 text-balance">Upcoming Tour Dates</h2>
+      <div class="grid gap-4 md:grid-cols-2">
         <article
           v-for="event in upcomingEvents"
           :key="event.id"
           class="rounded-lg border border-slate-800 bg-slate-900/60 p-4"
         >
-          <h3 class="text-base font-medium text-slate-100">{{ event.name }}</h3>
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="text-base font-semibold text-slate-100">{{ event.name }}</h3>
+            <span
+              v-if="event.dates?.start?.localDate && getUrgencyLabel(event.dates.start.localDate)"
+              class="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold bg-amber-500/15 text-amber-400"
+            >
+              {{ getUrgencyLabel(event.dates.start.localDate) }}
+            </span>
+          </div>
           <p class="mt-1 text-sm text-slate-300">
-            {{ event.dates?.start?.localDate ?? 'Unknown date' }}
-            <span v-if="event.dates?.start?.localTime"> • {{ event.dates.start.localTime }}</span>
+            <time
+              v-if="event.dates?.start?.localDate"
+              :datetime="event.dates.start.localDate"
+            >{{ formatShowDate(event.dates.start.localDate) }}</time>
+            <span v-else>Unknown date</span>
+            <span v-if="event.dates?.start?.localTime"> · {{ formatShowTime(event.dates.start.localTime) }}</span>
           </p>
           <p class="text-xs text-slate-400">
             {{ event._embedded?.venues?.[0]?.name ?? 'Unknown venue' }}
             <span v-if="event._embedded?.venues?.[0]?.city?.name">
-              • {{ event._embedded?.venues?.[0]?.city?.name }}
-            </span>
-            <span v-if="event._embedded?.venues?.[0]?.country?.name">
-              , {{ event._embedded?.venues?.[0]?.country?.name }}
+              · {{ event._embedded?.venues?.[0]?.city?.name }}
             </span>
           </p>
           <div class="mt-3 flex flex-wrap items-center gap-3">
@@ -144,7 +154,7 @@ const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value &
               :href="event.url"
               target="_blank"
               rel="noreferrer noopener"
-              class="w-full text-center text-xs font-medium text-slate-400 hover:text-slate-300"
+              class="w-full text-center text-xs font-medium text-amber-400 hover:text-amber-300"
             >
               {{ getEventListingLabel(event) }}
             </a>

@@ -1,39 +1,39 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-06-26T00:00:00Z",
+  "generatedAt": "2026-06-26T01:00:00Z",
   "title": "Design System: Live Music Tracker",
   "extensions": {
     "colorMeta": {
-      "stage-blackout":   { "role": "neutral",  "displayName": "Stage Blackout",   "canonical": "#020617", "tonalRamp": ["#020617","#060f24","#0a1830","#0e2140","#162a52","#1e3464","#2a4480","#3a5899"] },
-      "backstage-shadow": { "role": "neutral",  "displayName": "Backstage Shadow", "canonical": "#0f172a", "tonalRamp": ["#0f172a","#141f38","#1a2848","#223158","#2e3e6e","#3a4c88","#4e629a","#6a7fb2"] },
-      "equipment-case":   { "role": "neutral",  "displayName": "Equipment Case",   "canonical": "#1e293b", "tonalRamp": ["#1e293b","#25334a","#2e3e5c","#3a4e6e","#4a6080","#5e7498","#7890b0","#96aac8"] },
-      "amp-grill":        { "role": "neutral",  "displayName": "Amp Grill",        "canonical": "#334155", "tonalRamp": ["#334155","#3d4d65","#4a5c78","#5c6e8c","#6e82a0","#8298b8","#9eb0cc","#beccde"] },
-      "stage-fog":        { "role": "neutral",  "displayName": "Stage Fog",        "canonical": "#64748b", "tonalRamp": ["#334155","#404f65","#506075","#647488","#7a8da0","#94a6b8","#b2c0cc","#d2dae4"] },
-      "monitor-mix":      { "role": "neutral",  "displayName": "Monitor Mix",      "canonical": "#94a3b8", "tonalRamp": ["#475569","#566578","#6a7a8c","#8090a4","#94a3b8","#aabccc","#c2d0de","#dce6f0"] },
-      "crowd-glow":       { "role": "neutral",  "displayName": "Crowd Glow",       "canonical": "#cbd5e1", "tonalRamp": ["#64748b","#7a8a9c","#94a4b4","#aabccc","#c0d0e0","#d4e2ee","#e4eef8","#f0f6fc"] },
-      "house-lights":     { "role": "neutral",  "displayName": "House Lights",     "canonical": "#f1f5f9", "tonalRamp": ["#94a3b8","#aab8cc","#bec8da","#d4dce8","#e4ecf4","#eef4f9","#f4f8fc","#f8fbfe"] },
-      "pa-blue":          { "role": "primary",  "displayName": "PA Blue",          "canonical": "#38bdf8", "tonalRamp": ["#082f49","#0c4468","#0e6090","#0e84c4","#0ea5e9","#38bdf8","#7dd3fc","#bae6fd"] },
-      "pa-blue-dim":      { "role": "primary",  "displayName": "PA Blue Dim",      "canonical": "#0284c7", "tonalRamp": ["#082f49","#0a3d5c","#0c5070","#0e6e98","#0284c7","#0ea5e9","#38bdf8","#7dd3fc"] },
-      "deep-signal":      { "role": "neutral",  "displayName": "Deep Signal",      "canonical": "#082f49", "tonalRamp": ["#020e18","#041828","#06223c","#082f49","#0a4060","#0c5478","#0e6890","#1080b0"] }
+      "stage-blackout":   { "role": "neutral",  "displayName": "Stage Blackout",    "canonical": "#020617", "tonalRamp": ["#020617","#060f24","#0a1830","#0e2140","#162a52","#1e3464","#2a4480","#3a5899"] },
+      "backstage-shadow": { "role": "neutral",  "displayName": "Backstage Shadow",  "canonical": "#0f172a", "tonalRamp": ["#0f172a","#141f38","#1a2848","#223158","#2e3e6e","#3a4c88","#4e629a","#6a7fb2"] },
+      "equipment-case":   { "role": "neutral",  "displayName": "Equipment Case",    "canonical": "#1e293b", "tonalRamp": ["#1e293b","#25334a","#2e3e5c","#3a4e6e","#4a6080","#5e7498","#7890b0","#96aac8"] },
+      "amp-grill":        { "role": "neutral",  "displayName": "Amp Grill",         "canonical": "#334155", "tonalRamp": ["#334155","#3d4d65","#4a5c78","#5c6e8c","#6e82a0","#8298b8","#9eb0cc","#beccde"] },
+      "stage-fog":        { "role": "neutral",  "displayName": "Stage Fog",         "canonical": "#64748b", "tonalRamp": ["#334155","#404f65","#506075","#647488","#7a8da0","#94a6b8","#b2c0cc","#d2dae4"] },
+      "monitor-mix":      { "role": "neutral",  "displayName": "Monitor Mix",       "canonical": "#94a3b8", "tonalRamp": ["#475569","#566578","#6a7a8c","#8090a4","#94a3b8","#aabccc","#c2d0de","#dce6f0"] },
+      "crowd-glow":       { "role": "neutral",  "displayName": "Crowd Glow",        "canonical": "#cbd5e1", "tonalRamp": ["#64748b","#7a8a9c","#94a4b4","#aabccc","#c0d0e0","#d4e2ee","#e4eef8","#f0f6fc"] },
+      "house-lights":     { "role": "neutral",  "displayName": "House Lights",      "canonical": "#f1f5f9", "tonalRamp": ["#94a3b8","#aab8cc","#bec8da","#d4dce8","#e4ecf4","#eef4f9","#f4f8fc","#f8fbfe"] },
+      "spotlight":        { "role": "primary",  "displayName": "Spotlight",         "canonical": "#f59e0b", "tonalRamp": ["#451a03","#78350f","#92400e","#b45309","#d97706","#f59e0b","#fbbf24","#fcd34d"] },
+      "spotlight-bright": { "role": "primary",  "displayName": "Spotlight Bright",  "canonical": "#fbbf24", "tonalRamp": ["#78350f","#92400e","#b45309","#d97706","#f59e0b","#fbbf24","#fcd34d","#fde68a"] },
+      "spotlight-hover":  { "role": "primary",  "displayName": "Spotlight Hover",   "canonical": "#fcd34d", "tonalRamp": ["#92400e","#b45309","#d97706","#f59e0b","#fbbf24","#fcd34d","#fde68a","#fef3c7"] },
+      "amber-depth":      { "role": "neutral",  "displayName": "Amber Depth",       "canonical": "#451a03", "tonalRamp": ["#1c0a00","#2d1200","#3d1800","#451a03","#78350f","#92400e","#b45309","#d97706"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Page-level artist name and section titles. One per page." },
-      "headline": { "displayName": "Headline", "purpose": "App name in the global header. Not reused within pages." },
-      "title": { "displayName": "Title", "purpose": "Section subheadings: 'Upcoming Events', 'Show Info', 'Historical Setlists'." },
-      "body": { "displayName": "Body", "purpose": "Main content text — dates, venue names, descriptions. 65-75ch max." },
-      "label": { "displayName": "Label", "purpose": "Metadata: city, country, time, helper text. Minimum size in the system." }
+      "display":  { "displayName": "Display — Barlow Condensed 700",  "purpose": "Page h1s: artist name, genre, 'Local Upcoming Music', app name. One per page. Never on UI labels or buttons." },
+      "headline": { "displayName": "Headline — Barlow Condensed 600", "purpose": "Section h2s: 'Upcoming Events', 'Show Info', 'Historical Setlists', 'Upcoming Tour Dates'." },
+      "title":    { "displayName": "Title — Space Grotesk 600",       "purpose": "Card h3 event names. First tier of the Space Grotesk body system." },
+      "body":     { "displayName": "Body — Space Grotesk 400",        "purpose": "Card dates, descriptions. Extra leading compensates for perceived weight loss on dark backgrounds." },
+      "label":    { "displayName": "Label — Space Grotesk 400",       "purpose": "Venue, city, country metadata. Smallest size in the system (0.75rem)." }
     },
     "shadows": [
-      { "name": "cta-glow",        "value": "0 4px 6px -1px rgba(2, 132, 199, 0.4)",  "purpose": "Primary CTA button. Small lift and accent halo." },
-      { "name": "form-container",  "value": "0 10px 15px -3px rgba(8, 47, 73, 0.3)",  "purpose": "Global search form. Separates form from header gradient." }
+      { "name": "form-container", "value": "0 10px 15px -3px rgba(9, 9, 11, 0.6)", "purpose": "Global search form only. Separates from header gradient without hard edges." }
     ],
     "motion": [
-      { "name": "page-enter",     "value": "opacity 0→1, translateY(-10px→0), duration 260ms, delay 80ms", "purpose": "Page/content entrance. Reduced-motion fallback: instant show, no translate." },
-      { "name": "header-enter",   "value": "opacity 0→1, translateY(-12px→0), duration 280ms",             "purpose": "Header entrance on load." },
-      { "name": "state-transition","value": "all 150ms ease",                                               "purpose": "Button and input hover/focus state changes." }
+      { "name": "page-enter",      "value": "opacity 0→1, translateY(-10px→0), duration 260ms, delay 80ms", "purpose": "Page/content entrance. Reduced-motion fallback: instant show, no translate." },
+      { "name": "header-enter",    "value": "opacity 0→1, translateY(-12px→0), duration 280ms",             "purpose": "Header entrance on load." },
+      { "name": "state-transition","value": "all 150ms ease",                                                "purpose": "Button and input hover/focus state changes." }
     ],
     "breakpoints": [
-      { "name": "md", "value": "768px", "purpose": "Search form switches from column to row. Cards switch to 2-column grid." },
+      { "name": "md", "value": "768px",  "purpose": "Search form switches from column to row. Cards switch to 2-column grid." },
       { "name": "lg", "value": "1024px", "purpose": "Show detail page switches to 2-column side-by-side layout." }
     ]
   },
@@ -42,9 +42,9 @@
       "name": "Primary CTA Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Full-width on cards. Links to show detail + setlist page.",
+      "description": "Full-width on cards. Links to show detail + setlist page. Amber background, near-black text (~9.4:1 contrast).",
       "html": "<a class=\"ds-btn-primary\" href=\"#\">View Show + Setlist History</a>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 10px 12px; background: linear-gradient(to right, #0284c7, #2563eb); color: #fff; font-size: 0.875rem; font-weight: 600; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.4); transition: background 150ms ease, box-shadow 150ms ease; } .ds-btn-primary:hover { background: linear-gradient(to right, #0ea5e9, #3b82f6); } .ds-btn-primary:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 10px 12px; background: #f59e0b; color: #09090b; font-family: 'Space Grotesk', sans-serif; font-size: 0.875rem; font-weight: 600; border-radius: 8px; text-decoration: none; transition: background 150ms ease; } .ds-btn-primary:hover { background: #fbbf24; } .ds-btn-primary:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }"
     },
     {
       "name": "Disabled / Unavailable Button",
@@ -52,44 +52,44 @@
       "refersTo": "button-disabled",
       "description": "Shows when no show link is available. Non-interactive.",
       "html": "<p class=\"ds-btn-disabled\">Show + Setlist Unavailable</p>",
-      "css": ".ds-btn-disabled { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 10px 12px; background: #1e293b; color: #64748b; font-size: 0.875rem; font-weight: 500; border-radius: 8px; border: 1px solid #334155; cursor: default; }"
+      "css": ".ds-btn-disabled { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 10px 12px; background: #1e293b; color: #64748b; font-family: 'Space Grotesk', sans-serif; font-size: 0.875rem; font-weight: 500; border-radius: 8px; border: 1px solid #334155; cursor: default; }"
     },
     {
       "name": "Event Card",
       "kind": "card",
       "refersTo": "card",
-      "description": "Used in local discovery feed and artist/genre pages. Contains event name, date, venue, and CTA.",
-      "html": "<article class=\"ds-event-card\"><h3 class=\"ds-event-card__title\">Artist Name @ Venue</h3><p class=\"ds-event-card__date\">2026-07-15 • 8:00 PM</p><p class=\"ds-event-card__venue\">Crystal Ballroom • Portland, US</p><a class=\"ds-btn-primary\" href=\"#\" style=\"margin-top:12px\">View Show + Setlist History</a></article>",
-      "css": ".ds-event-card { background: rgba(15, 23, 42, 0.6); border: 1px solid #1e293b; border-radius: 8px; padding: 16px; } .ds-event-card__title { font-size: 1rem; font-weight: 500; color: #f1f5f9; margin: 0 0 4px; } .ds-event-card__date { font-size: 0.875rem; color: #cbd5e1; margin: 0 0 2px; } .ds-event-card__venue { font-size: 0.75rem; color: #94a3b8; margin: 0; }"
+      "description": "Discovery feed card. Three-tier hierarchy: semibold title, bright date, muted venue.",
+      "html": "<article class=\"ds-event-card\"><h3 class=\"ds-event-card__title\">Artist Name at Venue</h3><p class=\"ds-event-card__date\">2026-07-15 • 8:00 PM</p><p class=\"ds-event-card__venue\">Crystal Ballroom • Portland, US</p><a class=\"ds-btn-primary\" href=\"#\" style=\"margin-top:12px\">View Show + Setlist History</a></article>",
+      "css": ".ds-event-card { background: rgba(15, 23, 42, 0.6); border: 1px solid #1e293b; border-radius: 8px; padding: 16px; } .ds-event-card__title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; color: #f1f5f9; margin: 0 0 4px; } .ds-event-card__date { font-family: 'Space Grotesk', sans-serif; font-size: 0.875rem; font-weight: 400; color: #e2e8f0; margin: 0 0 2px; } .ds-event-card__venue { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 400; color: #64748b; margin: 0; }"
     },
     {
       "name": "Search Input",
       "kind": "input",
       "refersTo": "input",
-      "description": "Artist or genre text input. Part of the global search form.",
+      "description": "Artist or genre text input. Amber focus ring.",
       "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search artist\">",
-      "css": ".ds-input { flex: 1; background: #020617; border: 1px solid #475569; border-radius: 8px; padding: 8px 12px; font-size: 0.875rem; color: #f1f5f9; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; } .ds-input::placeholder { color: #64748b; } .ds-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2); }"
+      "css": ".ds-input { flex: 1; background: #020617; border: 1px solid #475569; border-radius: 8px; padding: 8px 12px; font-family: 'Space Grotesk', sans-serif; font-size: 0.875rem; color: #f1f5f9; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; } .ds-input::placeholder { color: #64748b; } .ds-input:focus { border-color: #fbbf24; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }"
     },
     {
       "name": "Search Form",
       "kind": "custom",
       "refersTo": null,
-      "description": "Global search bar in the header. Contains mode select, value input, city input, and submit button.",
+      "description": "Global search bar in the header. Amber submit button, amber focus rings.",
       "html": "<form class=\"ds-search-form\"><select class=\"ds-select\"><option>Artist</option><option>Genre</option></select><input class=\"ds-input\" type=\"text\" placeholder=\"Search artist\"><button class=\"ds-search-submit\" type=\"submit\">Search</button></form>",
-      "css": ".ds-search-form { display: flex; flex-direction: column; gap: 8px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(51, 65, 85, 0.8); border-radius: 12px; padding: 12px; box-shadow: 0 10px 15px -3px rgba(8, 47, 73, 0.3); } @media (min-width: 768px) { .ds-search-form { flex-direction: row; align-items: center; } } .ds-select { background: #020617; border: 1px solid #475569; border-radius: 8px; padding: 8px 12px; font-size: 0.875rem; color: #f1f5f9; outline: none; transition: border-color 150ms ease; } .ds-select:focus { border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2); } .ds-search-submit { background: linear-gradient(to right, #0284c7, #2563eb); color: #fff; font-size: 0.875rem; font-weight: 600; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.4); transition: background 150ms ease; } .ds-search-submit:hover { background: linear-gradient(to right, #0ea5e9, #3b82f6); } .ds-search-submit:disabled { opacity: 0.5; cursor: not-allowed; }"
+      "css": ".ds-search-form { display: flex; flex-direction: column; gap: 8px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(51, 65, 85, 0.8); border-radius: 12px; padding: 12px; box-shadow: 0 10px 15px -3px rgba(9, 9, 11, 0.6); } @media (min-width: 768px) { .ds-search-form { flex-direction: row; align-items: center; } } .ds-select { background: #020617; border: 1px solid #475569; border-radius: 8px; padding: 8px 12px; font-family: 'Space Grotesk', sans-serif; font-size: 0.875rem; color: #f1f5f9; outline: none; transition: border-color 150ms ease; } .ds-select:focus { border-color: #fbbf24; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); } .ds-search-submit { background: #f59e0b; color: #09090b; font-family: 'Space Grotesk', sans-serif; font-size: 0.875rem; font-weight: 600; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; transition: background 150ms ease; } .ds-search-submit:hover { background: #fbbf24; } .ds-search-submit:disabled { opacity: 0.5; cursor: not-allowed; }"
     },
     {
       "name": "Setlist Accordion Item",
       "kind": "custom",
       "refersTo": null,
-      "description": "The signature component. Expands to show the song list for a historical show.",
+      "description": "The signature component. Expands to show the song list for a historical show. Amber focus ring.",
       "html": "<article class=\"ds-setlist-item\"><button class=\"ds-setlist-toggle\" type=\"button\"><div><p class=\"ds-setlist-date\">2025-03-15</p><p class=\"ds-setlist-venue\">Crystal Ballroom • Portland</p></div><span class=\"ds-setlist-hint\">Show songs</span></button><div class=\"ds-setlist-body\"><ul class=\"ds-setlist-songs\"><li>Song One</li><li>Song Two</li><li>Song Three</li></ul></div></article>",
-      "css": ".ds-setlist-item { overflow: hidden; border-radius: 8px; border: 1px solid #1e293b; background: rgba(15, 23, 42, 0.6); } .ds-setlist-toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; text-align: left; background: none; border: none; cursor: pointer; } .ds-setlist-toggle:hover { background: rgba(255,255,255,0.03); } .ds-setlist-toggle:focus-visible { outline: 2px solid #38bdf8; outline-offset: -2px; } .ds-setlist-date { font-size: 0.875rem; font-weight: 500; color: #f1f5f9; margin: 0 0 2px; } .ds-setlist-venue { font-size: 0.75rem; color: #94a3b8; margin: 0; } .ds-setlist-hint { font-size: 0.75rem; color: #94a3b8; white-space: nowrap; } .ds-setlist-body { border-top: 1px solid #1e293b; padding: 12px 16px; } .ds-setlist-songs { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; } .ds-setlist-songs li { font-size: 0.875rem; color: #cbd5e1; }"
+      "css": ".ds-setlist-item { overflow: hidden; border-radius: 8px; border: 1px solid #1e293b; background: rgba(15, 23, 42, 0.6); } .ds-setlist-toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; text-align: left; background: none; border: none; cursor: pointer; } .ds-setlist-toggle:hover { background: rgba(255,255,255,0.03); } .ds-setlist-toggle:focus-visible { outline: 2px solid #f59e0b; outline-offset: -2px; } .ds-setlist-date { font-family: 'Space Grotesk', sans-serif; font-size: 0.875rem; font-weight: 600; color: #f1f5f9; margin: 0 0 2px; } .ds-setlist-venue { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #94a3b8; margin: 0; } .ds-setlist-hint { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #94a3b8; white-space: nowrap; } .ds-setlist-body { border-top: 1px solid #1e293b; padding: 12px 16px; } .ds-setlist-songs { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; } .ds-setlist-songs li { font-family: 'Space Grotesk', sans-serif; font-size: 0.875rem; color: #cbd5e1; }"
     }
   ],
   "narrative": {
     "northStar": "The Venue Board",
-    "overview": "The design system draws from the information environment of a real show: the whiteboard setlist backstage, the typed door list, the stack of tickets at the box office. Nothing decorative. Everything present because it has a job.\n\nThe system is a work in progress toward this north star. The current palette (cold slate + sky-blue) reflects the dominant SaaS dark-mode convention and is itself an anti-reference: design sessions should push the palette toward something with more earned character — warmer near-blacks, an accent that reads electric rather than corporate.\n\nDensity is deliberate. Music fans scan for specifics: dates, venues, names. The system uses tight spacing and small type where it works, opening up only where the hierarchy demands breathing room.",
+    "overview": "The design system draws from the information environment of a real show: the whiteboard setlist backstage, the typed door list, the stack of tickets at the box office. Nothing decorative. Everything present because it has a job.\n\nThe palette is dark slate with a single amber accent — concert spotlight energy, not corporate blue. Barlow Condensed headings reference show posters and venue signage; Space Grotesk body text is clean enough to disappear into the task.\n\nDensity is deliberate. Music fans scan for specifics: dates, venues, names. The system uses tight spacing and small type where it works, opening up only where the hierarchy demands breathing room.",
     "keyCharacteristics": [
       "Information-first: no decoration that doesn't carry meaning",
       "Tactile and immediate: elements respond crisply; interactions feel direct",
@@ -98,30 +98,33 @@
       "WCAG AA contrast at minimum for all text"
     ],
     "rules": [
-      { "name": "The One Accent Rule",    "body": "PA Blue (#38bdf8) is the only accent color in normal flow. It appears on links, focus rings, and the header gradient only. The gradient on the primary CTA button is a deviation and should be resolved to a flat accent on future improvement passes.", "section": "colors" },
-      { "name": "The Anti-Slate Rule",    "body": "The cold slate palette is documented as the current state, not the target state. Every design session should evaluate whether a given element can move toward more earned character. The dominant failure mode is 'looks like every other dark-mode tool' — if it does, that element needs attention.", "section": "colors" },
-      { "name": "The No-Uppercase Rule",  "body": "Avoid uppercase tracking (e.g., tracking-[0.18em]) as a section kicker. The current header uses it; future passes should remove it. The venue board doesn't shout in caps-with-tracking.", "section": "typography" },
-      { "name": "The Flat-by-Default Rule", "body": "Card surfaces are flat. Shadows appear only on elements that require perceived lift: the primary CTA button, the global search form. Do not add shadow to content cards — that escalates decoration over signal.", "section": "elevation" }
+      { "name": "The One Accent Rule",      "body": "Spotlight amber (#f59e0b) is the only accent in normal flow. CTA buttons, links, focus rings. No blue. No gradient on the CTA — flat amber, dark text, full stop.", "section": "colors" },
+      { "name": "The Anti-Slate Rule",      "body": "Cold slate is acceptable as infrastructure. The amber accent is what gives it character. Don't reintroduce blue accents. Don't add a second accent color without strategic reason.", "section": "colors" },
+      { "name": "The Two-Family Rule",      "body": "Barlow Condensed for headings (h1, h2) only. Space Grotesk for everything else. Never put Barlow Condensed on buttons, inputs, card body, or UI labels.", "section": "typography" },
+      { "name": "The No-Uppercase Rule",    "body": "Avoid uppercase tracking as a section kicker. The venue board uses condensed type weight to create hierarchy, not all-caps decoration.", "section": "typography" },
+      { "name": "The Flat-by-Default Rule", "body": "Card surfaces are flat. Shadows appear only on the global search form. Do not add shadow to content cards — that escalates decoration over signal.", "section": "elevation" }
     ],
     "dos": [
       "Do keep the background at Stage Blackout (#020617) or darker. The venue is never beige.",
-      "Do use text-slate-100 (#f1f5f9) for all headings and primary content text. Verify 4.5:1 contrast before any palette changes.",
+      "Do use house-lights (#f1f5f9) for all headings and primary content text. Verify 4.5:1 contrast before any palette changes.",
       "Do use rounded-lg (8px) consistently on all cards and interactive elements. Consistency is the system.",
-      "Do use focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 on every focusable input element. Keyboard navigation is not optional.",
-      "Do keep card surfaces flat (bg-slate-900/60, no shadow). Elevation is reserved for the CTA and search form only.",
+      "Do use focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 on every focusable input element. Keyboard navigation is not optional.",
+      "Do keep card surfaces flat (bg-slate-900/60, no shadow). Elevation is reserved for the search form only.",
       "Do use @media (prefers-reduced-motion: reduce) for every animation.",
+      "Do use font-display (Barlow Condensed) only on h1 and h2 elements. Space Grotesk (font-sans) carries the rest.",
       "Do favor type-driven hierarchy over icons and decorative elements. The information IS the design."
     ],
     "donts": [
-      "Don't use the current slate-950 + sky-blue palette as a target. It is the anti-reference ('generic SaaS dark UI'). Use this DESIGN.md as a snapshot of current state, not an endorsement.",
+      "Don't reintroduce sky-blue or corporate blue as an accent. The accent is amber (#f59e0b). One voice.",
       "Don't use background-clip: text with gradient backgrounds on any text element. Gradient text is decorative and never meaningful.",
       "Don't add border-left greater than 1px as a colored accent stripe on cards or callouts.",
-      "Don't use uppercase tracking (e.g., tracking-[0.18em] uppercase) as a section kicker.",
+      "Don't use uppercase tracking as a section kicker. The eyebrow pattern is a named ban.",
       "Don't build identical card grids with only icon + heading + body.",
-      "Don't replicate the Ticketmaster / StubHub pattern of competing CTAs and aggressive calls to action. One primary action per card, always.",
+      "Don't replicate the Ticketmaster / StubHub pattern of competing CTAs. One primary action per card, always.",
       "Don't import Spotify's algorithmic discovery language — 'You might also like', 'Recommended for you'.",
       "Don't add shadows to content cards. The Flat-by-Default Rule is not a suggestion.",
-      "Don't let placeholder text fall below 4.5:1 contrast. text-slate-500 on slate-950 is marginal — verify with any palette change."
+      "Don't put Barlow Condensed on buttons, inputs, card body text, or any UI label. The Two-Family Rule is strict.",
+      "Don't let placeholder text fall below 4.5:1 contrast. stage-fog (#64748b) on stage-blackout (#020617) is marginal — verify with any palette change."
     ]
   }
 }

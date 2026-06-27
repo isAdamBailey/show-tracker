@@ -64,7 +64,7 @@ const submitSearch = async (): Promise<void> => {
     <select
       id="search-mode"
       v-model="searchMode"
-      class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20"
+      class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20"
     >
       <option value="artist">Artist</option>
       <option value="genre">Genre</option>
@@ -76,7 +76,7 @@ const submitSearch = async (): Promise<void> => {
       id="search-value"
       v-model="searchValue"
       type="text"
-      class="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20"
+      class="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20"
       placeholder="Search artist"
     >
     <input
@@ -85,7 +85,7 @@ const submitSearch = async (): Promise<void> => {
       v-model="searchValue"
       type="text"
       list="ticketmaster-genre-options"
-      class="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20"
+      class="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20"
       :placeholder="genreLoading ? 'Loading genres...' : 'Type a genre (e.g. Punk)'"
     >
     <CitySearchInput v-model="artistCity" />
@@ -95,7 +95,7 @@ const submitSearch = async (): Promise<void> => {
 
     <button
       type="submit"
-      class="rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-sky-900/40 transition hover:from-sky-500 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+      class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
       :disabled="isEmptySearch"
     >
       Search

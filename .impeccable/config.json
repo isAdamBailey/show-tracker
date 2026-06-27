@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gray-on-color",
+        "value": "text-zinc-950",
+        "reason": "zinc-950 is #09090b (near-black), ~9.4:1 contrast on amber-500. Not a gray.",
+        "createdAt": "2026-06-27T00:22:14.686Z"
+      }
+    ]
+  }
+}

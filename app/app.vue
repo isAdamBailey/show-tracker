@@ -7,7 +7,7 @@ const currentYear = new Date().getFullYear()
 <template>
   <div class="min-h-screen bg-slate-950 text-slate-100">
     <header
-      class="border-b border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950/50"
+      class="border-b border-slate-800 bg-gradient-to-br from-slate-950 via-slate-950 to-amber-950/30"
     >
       <div
         v-motion
@@ -20,17 +20,15 @@ const currentYear = new Date().getFullYear()
             to="/"
             class="group"
           >
-            <p class="text-xs uppercase tracking-[0.18em] text-sky-300/80">Discover Live Music</p>
             <h1
-              class="text-2xl font-bold tracking-tight text-white transition group-hover:text-sky-300 md:text-3xl"
+              class="font-display text-3xl font-bold leading-none tracking-tight text-white transition group-hover:text-amber-300 md:text-5xl"
             >
               Live Music Tracker
             </h1>
           </NuxtLink>
         </div>
-        <p class="max-w-3xl text-sm text-slate-300 md:text-base">
-          Find upcoming shows fast with artist or genre search and jump straight into show details +
-          setlist history.
+        <p class="max-w-2xl text-sm text-slate-400">
+          Search by artist or genre — jump straight to show details and setlist history.
         </p>
         <GlobalSearch />
       </div>
@@ -51,7 +49,7 @@ const currentYear = new Date().getFullYear()
           href="https://adambailey.io"
           target="_blank"
           rel="noreferrer noopener"
-          class="text-sky-400 hover:text-sky-300"
+          class="text-amber-400 hover:text-amber-300"
         >
           Adam Bailey
         </a>

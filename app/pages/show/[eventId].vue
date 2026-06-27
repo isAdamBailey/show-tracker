@@ -8,6 +8,7 @@ import type {
   TicketmasterEvent
 } from '../../types/music'
 import { fetchMergedArtistEvents, getEventListingLabel } from '../../utils/events'
+import { formatShowDate, formatShowTime } from '../../utils/dates'
 
 interface ShowPagePayload {
   upcomingEvents: TicketmasterEvent[]
@@ -121,7 +122,7 @@ const partialFailure = computed<boolean>(
 <template>
   <main class="mx-auto flex max-w-7xl flex-col gap-6 p-6">
     <header class="space-y-1">
-      <h1 class="text-3xl font-semibold tracking-tight text-slate-100">
+      <h1 class="font-display text-3xl font-bold leading-none tracking-tight text-slate-100 text-balance">
         {{ artistNameFromQuery || 'Show Details' }}
       </h1>
       <p class="text-sm text-slate-400">
@@ -174,22 +175,23 @@ const partialFailure = computed<boolean>(
         class="rounded-lg border border-slate-800 bg-slate-900/60 p-5"
         :class="{ 'opacity-70': !selectedEvent }"
       >
-        <h2 class="text-xl font-medium text-slate-100">Show Info</h2>
+        <h2 class="font-display text-xl font-semibold leading-tight tracking-tight text-slate-100">Show Info</h2>
         <template v-if="selectedEvent">
-          <h3 class="mt-4 text-base font-medium text-slate-100">{{ selectedEvent.name }}</h3>
+          <h3 class="mt-4 text-base font-semibold text-slate-100">{{ selectedEvent.name }}</h3>
           <p class="mt-1 text-sm text-slate-300">
-            {{ selectedEvent.dates?.start?.localDate ?? 'Unknown date' }}
+            <time
+              v-if="selectedEvent.dates?.start?.localDate"
+              :datetime="selectedEvent.dates.start.localDate"
+            >{{ formatShowDate(selectedEvent.dates.start.localDate) }}</time>
+            <span v-else>Unknown date</span>
             <span v-if="selectedEvent.dates?.start?.localTime">
-              • {{ selectedEvent.dates.start.localTime }}
+              · {{ formatShowTime(selectedEvent.dates.start.localTime) }}
             </span>
           </p>
           <p class="text-xs text-slate-400">
             {{ selectedEvent._embedded?.venues?.[0]?.name ?? 'Unknown venue' }}
             <span v-if="selectedEvent._embedded?.venues?.[0]?.city?.name">
-              • {{ selectedEvent._embedded?.venues?.[0]?.city?.name }}
-            </span>
-            <span v-if="selectedEvent._embedded?.venues?.[0]?.country?.name">
-              , {{ selectedEvent._embedded?.venues?.[0]?.country?.name }}
+              · {{ selectedEvent._embedded?.venues?.[0]?.city?.name }}
             </span>
           </p>
           <a
@@ -197,7 +199,7 @@ const partialFailure = computed<boolean>(
             :href="selectedEvent.url"
             target="_blank"
             rel="noreferrer noopener"
-            class="mt-3 inline-block text-xs font-medium text-sky-400 hover:text-sky-300"
+            class="mt-3 inline-block text-xs font-medium text-amber-400 hover:text-amber-300"
           >
             {{ getEventListingLabel(selectedEvent) }}
           </a>
@@ -208,7 +210,7 @@ const partialFailure = computed<boolean>(
       </article>
 
       <article class="rounded-lg border border-slate-800 bg-slate-900/60 p-5">
-        <h2 class="text-xl font-medium text-slate-100">Historical Setlists</h2>
+        <h2 class="font-display text-xl font-semibold leading-tight tracking-tight text-slate-100">Historical Setlists</h2>
         <div class="mt-4">
           <SetlistAccordion v-if="setlists.length > 0" :setlists="setlists" />
           <p v-else class="text-sm text-slate-400">No historical setlist data available.</p>
