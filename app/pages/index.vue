@@ -1,22 +1,23 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import ngeohash from 'ngeohash'
+import { onMounted, ref, watch } from 'vue'
 import ShowSetlistButton from '../components/ShowSetlistButton.vue'
 import { useMusicCacheStore } from '../stores/music-cache'
 import type { TicketmasterEvent, TmDiscoveryProxyResponse } from '../types/music'
 import { formatShowDate, formatShowTime, getUrgencyLabel } from '../utils/dates'
+import { FALLBACK_GEOPOINT, useUserLocation } from '../composables/useUserCity'
 
-// Portland, OR geohash — fallback when user denies geolocation
-const FALLBACK_GEOPOINT = 'c20fbr'
-const FALLBACK_LOCATION_LABEL = 'Portland/Vancouver'
 const DEFAULT_GENRE = 'Rock'
 
 const musicCacheStore = useMusicCacheStore()
+const { userGeoPoint, userCity } = useUserLocation()
 
 const events = ref<TicketmasterEvent[]>([])
 const loading = ref<boolean>(true)
 const errorMessage = ref<string | null>(null)
-const locationLabel = ref<string>(FALLBACK_LOCATION_LABEL)
+
+const locationLabel = computed<string>(() =>
+  userCity.value ? userCity.value : userGeoPoint.value === FALLBACK_GEOPOINT ? 'Portland/Vancouver' : 'Your area'
+)
 
 const getArtistNameFromEvent = (event: TicketmasterEvent): string | null => {
   return event._embedded?.attractions?.[0]?.name ?? null
@@ -55,22 +56,13 @@ const fetchEvents = async (geoPoint: string): Promise<void> => {
 }
 
 onMounted(async () => {
-  // Load Portland data immediately so the page isn't blank while waiting for geolocation
   await fetchEvents(FALLBACK_GEOPOINT)
+})
 
-  if (!('geolocation' in navigator)) return
-
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      const { latitude, longitude } = position.coords
-      const geoPoint = ngeohash.encode(latitude, longitude, 6)
-      if (geoPoint === FALLBACK_GEOPOINT) return
-      locationLabel.value = 'Your area'
-      await fetchEvents(geoPoint)
-    },
-    () => { /* denied — already showing Portland results */ },
-    { timeout: 6000 }
-  )
+watch(userGeoPoint, async (geoPoint) => {
+  if (geoPoint !== FALLBACK_GEOPOINT) {
+    await fetchEvents(geoPoint)
+  }
 })
 </script>
 

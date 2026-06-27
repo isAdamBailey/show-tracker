@@ -6,7 +6,12 @@ type SearchMode = 'artist' | 'genre'
 
 const searchMode = ref<SearchMode>('artist')
 const searchValue = ref<string>('')
-const artistCity = ref<string>('')
+const { userCity } = useUserLocation()
+const artistCity = ref<string>(userCity.value)
+
+watch(userCity, (city) => {
+  if (city && !artistCity.value) artistCity.value = city
+})
 
 const { data: classificationData, pending: genreLoading } = await useAsyncData<TmClassificationListResponse>(
   'tm-classifications',

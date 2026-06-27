@@ -2,6 +2,11 @@
 import GlobalSearch from './components/GlobalSearch.vue'
 
 const currentYear = new Date().getFullYear()
+const { detectLocation } = useUserLocation()
+
+onMounted(() => {
+  detectLocation()
+})
 </script>
 
 <template>

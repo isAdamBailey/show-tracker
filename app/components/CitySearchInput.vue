@@ -53,6 +53,7 @@ const selectCity = (city: string): void => {
       @focus="openSuggestions"
       @input="openSuggestions"
       @blur="closeSuggestions"
+      @keydown.enter="closeSuggestions"
     >
     <ul
       v-if="showSuggestions"
