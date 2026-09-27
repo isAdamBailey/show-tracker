@@ -2,15 +2,46 @@ import type {
   SeatGeekEvent,
   SeatGeekEventsResponse,
   SeatGeekGenresResponse,
+  SeatGeekPerformer,
   SeatGeekPerformersResponse,
   TicketmasterEvent
 } from '../../app/types/music'
+import { foldText } from '#shared/utils/text'
 
 const SEATGEEK_API_BASE = 'https://api.seatgeek.com/2'
 const GENRE_PERFORMER_LIMIT = 8
 const EVENTS_PER_PAGE = 50
+// SeatGeek caps per_page at 100.
+const MAX_PER_PAGE = 100
+const MAX_LOCAL_PAGES = 4
+
+/** SeatGeek ids are prefixed so they never collide with Ticketmaster's. */
+export const SEATGEEK_ID_PREFIX = 'sg-'
 
 const MUSIC_PERFORMER_TYPES = new Set(['band', 'music_festival'])
+
+export const isMusicPerformer = (performer: SeatGeekPerformer): boolean =>
+  MUSIC_PERFORMER_TYPES.has(performer.type ?? '')
+
+// SeatGeek genre slugs are finer-grained than Ticketmaster's; fold them into
+// Ticketmaster's top-level Music genres so genre chips stay consistent.
+// Rules match folded text, where slug hyphens become spaces.
+const SEATGEEK_GENRE_RULES: Array<[RegExp, string]> = [
+  [/metal|hardcore|grindcore/, 'Metal'],
+  [/hip ?hop|rap/, 'Hip-Hop/Rap'],
+  [/rnb|r and b|soul|funk/, 'R&B'],
+  [/country|bluegrass|americana/, 'Country'],
+  [/folk|singer songwriter/, 'Folk'],
+  [/jazz/, 'Jazz'],
+  [/blues/, 'Blues'],
+  [/electronic|edm|house|techno|dance|dubstep|trance/, 'Dance/Electronic'],
+  [/classical|opera/, 'Classical'],
+  [/latin|reggaeton/, 'Latin'],
+  [/reggae/, 'Reggae'],
+  [/alternative|indie/, 'Alternative'],
+  [/rock|punk|grunge|emo/, 'Rock'],
+  [/pop/, 'Pop']
+]
 
 const getTodayDate = (): string => {
   return new Date().toISOString().slice(0, 10)
@@ -43,15 +74,31 @@ const parseEventDateTime = (datetime: string | undefined): { localDate?: string;
   }
 }
 
-const normalizeComparableText = (value: string | undefined): string => {
-  return (value ?? '').trim().toLowerCase()
+const mapSeatGeekGenre = (genre: { slug?: string; name?: string } | undefined): string | undefined => {
+  const key = foldText(genre?.slug ?? genre?.name)
+  if (!key) {
+    return undefined
+  }
+  return SEATGEEK_GENRE_RULES.find(([pattern]) => pattern.test(key))?.[1] ?? 'Other'
+}
+
+const orderPerformers = (performers: SeatGeekPerformer[]): SeatGeekPerformer[] => {
+  // The canonical headliner is attractions[0], so the primary performer goes first.
+  const primary = performers.find((performer) => performer.primary)
+  return primary ? [primary, ...performers.filter((performer) => performer !== primary)] : performers
 }
 
 export const normalizeSeatGeekEvent = (event: SeatGeekEvent): TicketmasterEvent => {
   const { localDate, localTime } = parseEventDateTime(event.datetime_local ?? event.datetime_utc)
+  const performers = orderPerformers(event.performers ?? [])
+  const headliner = performers[0]
+  const headlinerGenre = headliner?.genres?.find((genre) => genre.primary) ?? headliner?.genres?.[0]
+  const genreName = mapSeatGeekGenre(headlinerGenre)
+  const lowestPrice = event.stats?.lowest_price ?? undefined
+  const highestPrice = event.stats?.highest_price ?? undefined
 
   return {
-    id: `sg-${event.id}`,
+    id: `${SEATGEEK_ID_PREFIX}${event.id}`,
     source: 'seatgeek',
     name: event.title,
     url: buildSeatGeekUrl(event.url),
@@ -62,13 +109,19 @@ export const normalizeSeatGeekEvent = (event: SeatGeekEvent): TicketmasterEvent 
         dateTime: event.datetime_local ?? event.datetime_utc
       }
     },
+    priceRanges:
+      lowestPrice != null ? [{ min: lowestPrice, max: highestPrice ?? lowestPrice, currency: 'USD' }] : undefined,
+    classifications: genreName ? [{ segment: { name: 'Music' }, genre: { name: genreName } }] : undefined,
     _embedded: {
       venues: event.venue
         ? [
             {
+              id: event.venue.id != null ? `${SEATGEEK_ID_PREFIX}${event.venue.id}` : undefined,
               name: event.venue.name,
               city: { name: event.venue.city },
-              country: { name: event.venue.country },
+              state: event.venue.state ? { stateCode: event.venue.state } : undefined,
+              country: { name: event.venue.country, countryCode: event.venue.country },
+              address: event.venue.address ? { line1: event.venue.address } : undefined,
               location: {
                 latitude: event.venue.location?.lat?.toString(),
                 longitude: event.venue.location?.lon?.toString()
@@ -76,30 +129,20 @@ export const normalizeSeatGeekEvent = (event: SeatGeekEvent): TicketmasterEvent 
             }
           ]
         : undefined,
-      attractions: (event.performers ?? []).map((performer) => ({ name: performer.name }))
+      attractions: performers.map((performer) => ({ name: performer.name }))
     }
   }
 }
 
+const isMusicEvent = (event: SeatGeekEvent): boolean =>
+  event.type === 'concert' ||
+  (event.performers ?? []).some(isMusicPerformer)
+
 const normalizeSeatGeekEvents = (events: SeatGeekEvent[]): TicketmasterEvent[] => {
-  return events
-    .filter((event) => event.type === 'concert' || (event.performers ?? []).some((performer) => MUSIC_PERFORMER_TYPES.has(performer.type ?? '')))
-    .map(normalizeSeatGeekEvent)
+  return events.filter(isMusicEvent).map(normalizeSeatGeekEvent)
 }
 
-const filterEventsByCity = (events: TicketmasterEvent[], city: string | undefined): TicketmasterEvent[] => {
-  const normalizedCity = normalizeComparableText(city)
-  if (!normalizedCity) {
-    return events
-  }
-
-  return events.filter((event) => {
-    const eventCity = normalizeComparableText(event._embedded?.venues?.[0]?.city?.name)
-    return eventCity.includes(normalizedCity) || normalizedCity.includes(eventCity)
-  })
-}
-
-const fetchSeatGeekResource = async <T>(
+export const fetchSeatGeekResource = async <T>(
   path: string,
   clientId: string,
   query: Record<string, string | number | undefined> = {}
@@ -116,25 +159,26 @@ const fetchSeatGeekResource = async <T>(
 const pickBestPerformer = (
   performers: SeatGeekPerformersResponse['performers'],
   artistName: string
-): SeatGeekPerformersResponse['performers'][number] | null => {
-  const normalizedArtistName = normalizeComparableText(artistName)
-  const musicPerformers = performers.filter((performer) => MUSIC_PERFORMER_TYPES.has(performer.type ?? ''))
+): SeatGeekPerformer | null => {
+  const allPerformers = performers ?? []
+  const normalizedArtistName = foldText(artistName)
+  const musicPerformers = allPerformers.filter(isMusicPerformer)
 
   const exactMatch = musicPerformers.find(
-    (performer) => normalizeComparableText(performer.name) === normalizedArtistName
+    (performer) => foldText(performer.name) === normalizedArtistName
   )
   if (exactMatch) {
     return exactMatch
   }
 
   const partialMatch = musicPerformers.find((performer) =>
-    normalizeComparableText(performer.name).includes(normalizedArtistName)
+    foldText(performer.name).includes(normalizedArtistName)
   )
   if (partialMatch) {
     return partialMatch
   }
 
-  return musicPerformers[0] ?? performers[0] ?? null
+  return musicPerformers[0] ?? allPerformers[0] ?? null
 }
 
 const toGenreSlug = (genre: string): string => {
@@ -156,15 +200,15 @@ const resolveGenreSlug = async (genre: string, clientId: string): Promise<string
     return exactSlugMatch.slug
   }
 
-  const normalizedGenre = normalizeComparableText(genre)
-  const nameMatch = genres.find((entry) => normalizeComparableText(entry.name) === normalizedGenre)
+  const normalizedGenre = foldText(genre)
+  const nameMatch = genres.find((entry) => foldText(entry.name) === normalizedGenre)
   if (nameMatch?.slug) {
     return nameMatch.slug
   }
 
   const partialMatch = genres.find((entry) => {
     const slug = entry.slug ?? ''
-    const name = normalizeComparableText(entry.name)
+    const name = foldText(entry.name)
     return slug.includes(derivedSlug) || derivedSlug.includes(slug) || name.includes(normalizedGenre)
   })
   if (partialMatch?.slug) {
@@ -174,31 +218,22 @@ const resolveGenreSlug = async (genre: string, clientId: string): Promise<string
   return derivedSlug
 }
 
-const buildConcertEventQuery = (city: string | undefined): Record<string, string> => {
-  const query: Record<string, string> = {
-    type: 'concert',
-    'datetime_utc.gte': getTodayDate(),
-    sort: 'datetime_utc.asc'
-  }
-
-  if (city?.trim()) {
-    query['venue.city'] = city.trim()
-  }
-
-  return query
-}
+const buildConcertEventQuery = (): Record<string, string> => ({
+  type: 'concert',
+  'datetime_utc.gte': getTodayDate(),
+  sort: 'datetime_utc.asc'
+})
 
 export const fetchSeatGeekArtistEvents = async (
   artistName: string,
-  clientId: string,
-  city?: string
+  clientId: string
 ): Promise<TicketmasterEvent[]> => {
   const performersResponse = await fetchSeatGeekResource<SeatGeekPerformersResponse>('/performers', clientId, {
     q: artistName
   })
 
   const matchedPerformer = pickBestPerformer(performersResponse.performers ?? [], artistName)
-  const eventQuery = buildConcertEventQuery(city)
+  const eventQuery = buildConcertEventQuery()
 
   if (matchedPerformer) {
     const eventsResponse = await fetchSeatGeekResource<SeatGeekEventsResponse>('/events', clientId, {
@@ -207,7 +242,7 @@ export const fetchSeatGeekArtistEvents = async (
     })
     const normalizedEvents = normalizeSeatGeekEvents(eventsResponse.events ?? [])
     if (normalizedEvents.length > 0) {
-      return filterEventsByCity(normalizedEvents, city)
+      return normalizedEvents
     }
   }
 
@@ -216,36 +251,80 @@ export const fetchSeatGeekArtistEvents = async (
     q: artistName
   })
 
-  return filterEventsByCity(normalizeSeatGeekEvents(keywordResponse.events ?? []), city)
+  return normalizeSeatGeekEvents(keywordResponse.events ?? [])
 }
 
-export const fetchSeatGeekGenreEvents = async (
-  genre: string,
-  clientId: string,
-  city?: string
-): Promise<TicketmasterEvent[]> => {
+export const fetchSeatGeekGenreEvents = async (genre: string, clientId: string): Promise<TicketmasterEvent[]> => {
   const genreSlug = await resolveGenreSlug(genre, clientId)
   const performersResponse = await fetchSeatGeekResource<SeatGeekPerformersResponse>('/performers', clientId, {
     'genres.slug': genreSlug
   })
 
   const performerIds = (performersResponse.performers ?? [])
-    .filter((performer) => MUSIC_PERFORMER_TYPES.has(performer.type ?? ''))
+    .filter(isMusicPerformer)
     .slice(0, GENRE_PERFORMER_LIMIT)
     .map((performer) => performer.id)
 
   if (performerIds.length === 0) {
     const keywordResponse = await fetchSeatGeekResource<SeatGeekEventsResponse>('/events', clientId, {
-      ...buildConcertEventQuery(city),
+      ...buildConcertEventQuery(),
       q: genre
     })
-    return filterEventsByCity(normalizeSeatGeekEvents(keywordResponse.events ?? []), city)
+    return normalizeSeatGeekEvents(keywordResponse.events ?? [])
   }
 
   const eventsResponse = await fetchSeatGeekResource<SeatGeekEventsResponse>('/events', clientId, {
-    ...buildConcertEventQuery(city),
+    ...buildConcertEventQuery(),
     'performers.id': performerIds.join(',')
   })
 
-  return filterEventsByCity(normalizeSeatGeekEvents(eventsResponse.events ?? []), city)
+  return normalizeSeatGeekEvents(eventsResponse.events ?? [])
+}
+
+export interface SeatGeekLocalQuery {
+  lat: number
+  lon: number
+  rangeMiles: number
+  /** Local datetimes, `YYYY-MM-DDTHH:mm:ss`. */
+  start: string
+  end: string
+}
+
+export const fetchSeatGeekLocalEvents = async (
+  query: SeatGeekLocalQuery,
+  clientId: string
+): Promise<TicketmasterEvent[]> => {
+  const baseQuery = {
+    type: 'concert',
+    lat: query.lat,
+    lon: query.lon,
+    range: `${query.rangeMiles}mi`,
+    'datetime_local.gte': query.start,
+    'datetime_local.lte': query.end,
+    sort: 'datetime_local.asc',
+    per_page: MAX_PER_PAGE
+  }
+
+  const events: SeatGeekEvent[] = []
+  for (let page = 1; page <= MAX_LOCAL_PAGES; page += 1) {
+    const response = await fetchSeatGeekResource<SeatGeekEventsResponse>('/events', clientId, {
+      ...baseQuery,
+      page
+    })
+    const pageEvents = response.events ?? []
+    events.push(...pageEvents)
+    const total = response.meta?.total ?? 0
+    if (pageEvents.length < MAX_PER_PAGE || events.length >= total) {
+      break
+    }
+  }
+
+  return normalizeSeatGeekEvents(events)
+}
+
+export const fetchSeatGeekEventById = async (id: string, clientId: string): Promise<TicketmasterEvent> => {
+  const event = await $fetch<SeatGeekEvent>(`${SEATGEEK_API_BASE}/events/${encodeURIComponent(id)}`, {
+    query: { client_id: clientId }
+  })
+  return normalizeSeatGeekEvent(event)
 }

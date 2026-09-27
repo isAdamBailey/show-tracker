@@ -2,78 +2,112 @@
 name: Live Music Tracker
 description: Fast-lookup tool for upcoming shows and setlist history — built for music fans, not a ticketing company.
 colors:
-  stage-blackout: "#020617"
-  backstage-shadow: "#0f172a"
-  equipment-case: "#1e293b"
-  amp-grill: "#334155"
-  stage-fog: "#64748b"
-  monitor-mix: "#94a3b8"
-  crowd-glow: "#cbd5e1"
-  house-lights: "#f1f5f9"
-  spotlight: "#f59e0b"
-  spotlight-bright: "#fbbf24"
-  spotlight-hover: "#fcd34d"
-  amber-depth: "#451a03"
+  canvas: "#15120f"
+  surface: "#1e1a15"
+  surface-hi: "#2a241d"
+  line: "#2c261f"
+  line-strong: "#3b342b"
+  skeleton: "#26211b"
+  skeleton-soft: "#221d18"
+  ink: "#f4efe7"
+  ink-2: "#d2c9ba"
+  ink-3: "#b8ad9d"
+  muted: "#9b907f"
+  placeholder: "#8a8072"
+  faint: "#6f665a"
+  accent: "#ff7b2e"
+  accent-hover: "#ff9150"
+  accent-text: "#ff8a4c"
+  accent-soft: "rgba(255, 123, 46, 0.16)"
+  accent-soft-ink: "#ff9a62"
+  on-accent: "#140d07"
+  error-line: "#5a2620"
+  warn-bg: "#211a13"
+  warn-line: "#3b2c1e"
+  warn-ink: "#e8d6c2"
 typography:
+  display-xl:
+    fontFamily: "Barlow Condensed, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "72px"
+    fontWeight: 700
+    lineHeight: 0.88
+    letterSpacing: "-0.015em"
   display:
     fontFamily: "Barlow Condensed, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.875rem"
+    fontSize: "64px"
     fontWeight: 700
-    lineHeight: 1
-    letterSpacing: "-0.025em"
+    lineHeight: 0.9
+    letterSpacing: "-0.015em"
   headline:
     fontFamily: "Barlow Condensed, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.25rem"
+    fontSize: "40px"
+    fontWeight: 700
+    lineHeight: 1
+  headliner:
+    fontFamily: "Barlow Condensed, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "30px"
     fontWeight: 600
-    lineHeight: 1.2
-    letterSpacing: "-0.025em"
-  title:
-    fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1rem"
+    lineHeight: 1
+  set-header:
+    fontFamily: "Barlow Condensed, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "20px"
     fontWeight: 600
-    lineHeight: 1.4
-  body:
+    lineHeight: 1
+  body-lg:
     fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.875rem"
+    fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.5
+  body:
+    fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "15px"
+    fontWeight: 400
+    lineHeight: 1.5
+  body-sm:
+    fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: 1.5
+  meta:
+    fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: 1.4
   label:
     fontFamily: "Space Grotesk, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.75rem"
+    fontSize: "12px"
     fontWeight: 400
     lineHeight: 1.4
 rounded:
-  sm: "6px"
-  md: "8px"
+  tag: "4px"
+  seg: "6px"
   lg: "8px"
-  xl: "12px"
+  full: "999px"
 spacing:
-  xs: "4px"
-  sm: "8px"
-  md: "12px"
-  lg: "16px"
-  xl: "20px"
-  2xl: "24px"
+  gutter-mobile: "18px"
+  gutter-desktop: "40px"
+  row-desktop: "18px 16px"
+  row-mobile: "14px 18px"
 components:
   button-primary:
-    backgroundColor: "{colors.spotlight}"
-    textColor: "#09090b"
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-accent}"
     rounded: "{rounded.lg}"
     padding: "10px 16px"
-  button-disabled:
-    backgroundColor: "{colors.equipment-case}"
-    textColor: "{colors.stage-fog}"
+  button-inverse:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.canvas}"
     rounded: "{rounded.lg}"
     padding: "10px 16px"
-  card:
-    backgroundColor: "{colors.backstage-shadow}"
-    rounded: "{rounded.lg}"
-    padding: "16px"
   input:
-    backgroundColor: "{colors.stage-blackout}"
-    textColor: "{colors.house-lights}"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.lg}"
-    padding: "8px 12px"
+    padding: "0 14px"
+  popover:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.lg}"
+    padding: "8px 0"
 ---
 
 # Design System: Live Music Tracker
@@ -84,7 +118,7 @@ components:
 
 The design system draws from the information environment of a real show: the whiteboard setlist backstage, the typed door list, the stack of tickets at the box office. Nothing decorative. Everything present because it has a job. The hierarchy is clear because the environment demands it — the name of the band, the date, the venue, the doors time. Information that earns its place.
 
-The system is a work in progress toward this north star. The current palette (cold slate + sky-blue) reflects the dominant SaaS dark-mode convention and is itself an anti-reference: design sessions should push the palette toward something with more earned character — warmer near-blacks, an accent that reads electric rather than corporate. The north star is not the current state; it's the target.
+The Venue Board redesign (September 2026) replaced the cold slate + sky/amber palette with warm near-blacks and a single electric orange. The home feed is a date-led schedule, not a card grid; every row is one click target.
 
 Density is deliberate. Music fans scan for specifics: dates, venues, names. The system uses tight spacing and small type where it works, opening up only where the hierarchy demands breathing room. A list of upcoming shows is not a gallery — it's a schedule.
 
@@ -92,105 +126,127 @@ Density is deliberate. Music fans scan for specifics: dates, venues, names. The 
 - Information-first: no decoration that doesn't carry meaning
 - Tactile and immediate: elements respond crisply; interactions feel direct
 - Fan-built, not corporate: language and layout feel like they were made by someone who goes to shows
-- Earned darkness: the dark theme references the venue environment, not a SaaS aesthetic
+- Earned darkness: warm, brown-black surfaces reference the venue, not a SaaS aesthetic
 - WCAG AA contrast at minimum for all text
 
 ## 2. Colors
 
-A near-black base with a single electric accent. The palette aims for the inside of a venue: dark surfaces, pools of light where information lives.
+A warm near-black base with one electric orange accent. Every color is a Tailwind token in `tailwind.config.ts` (`bg-canvas`, `text-ink-2`, `border-line-strong`, `bg-accent-soft`, …). Never use raw hex or Tailwind's default slate/amber/sky palettes in components.
 
-### Primary
-- **Spotlight** (`#f59e0b` / amber-500): The accent. Used for CTA buttons, links, focus rings, and hover states. Amber reads as concert spotlight — intentional and warm, the opposite of corporate sky-blue. Text on Spotlight buttons uses near-black (`#09090b`) for ~9.4:1 contrast.
-- **Spotlight Bright** (`#fbbf24` / amber-400): Hover state for links and button hover target.
-- **Spotlight Hover** (`#fcd34d` / amber-300): Hover text state for links (`hover:text-amber-300`).
+### Surfaces and lines
+| Token | Hex | Use |
+|---|---|---|
+| `canvas` | `#15120f` | Page background. The house with the lights down. |
+| `surface` | `#1e1a15` | Inputs, row hover, popovers, segmented-control track. |
+| `surface-hi` | `#2a241d` | Hover and keyboard highlight inside popovers. |
+| `line` | `#2c261f` | Row dividers and section borders. |
+| `line-strong` | `#3b342b` | Input, chip and tag borders — signals affordance. |
+| `skeleton` / `skeleton-soft` | `#26211b` / `#221d18` | Loading blocks (primary / secondary). `skeleton-soft` is also the mobile search row divider. |
 
-### Neutral
-- **Stage Blackout** (`#020617`): The body background. Deep near-black, cold undertone. The stage in darkness.
-- **Backstage Shadow** (`#0f172a`): Card surfaces and form containers. One step up from the base.
-- **Equipment Case** (`#1e293b`): Borders on cards and containers. Structural, not decorative.
-- **Amp Grill** (`#334155`): Interactive borders (inputs, selects). Indicates affordance.
-- **Stage Fog** (`#64748b`): Disabled state text and placeholder text.
-- **Monitor Mix** (`#94a3b8`): Muted secondary metadata — venue names, timestamps, helper text.
-- **Crowd Glow** (`#cbd5e1`): Secondary body text, readable against dark surfaces.
-- **House Lights** (`#f1f5f9`): Primary text. The brightest neutral, used for headings and label text.
+### Text
+| Token | Hex | Use |
+|---|---|---|
+| `ink` | `#f4efe7` | Primary text; also the active tab background. |
+| `ink-2` | `#d2c9ba` | Support acts, secondary text, inactive tabs and chips. |
+| `ink-3` | `#b8ad9d` | Helper copy, genre tag text, back links. |
+| `muted` | `#9b907f` | Metadata and labels: dates above day numbers, doors time, column headers. |
+| `placeholder` | `#8a8072` | Input placeholder only. |
+| `faint` | `#6f665a` | Song numbers only. Too low-contrast for anything a user must read. |
+
+### Accent
+| Token | Hex | Use |
+|---|---|---|
+| `accent` | `#ff7b2e` | Primary CTA fill, active genre chip, city underline, focus outline/border. |
+| `accent-hover` | `#ff9150` | CTA and accent-link hover. |
+| `accent-text` | `#ff8a4c` | Accent-colored text on canvas: links, "Setlists →", "Hide songs", Encore headers, the city name. |
+| `accent-soft` + `accent-soft-ink` | `rgba(255,123,46,.16)` + `#ff9a62` | "Tonight" / "Tomorrow" urgency badge. |
+| `on-accent` | `#140d07` | Text on an `accent` fill. |
+
+### States
+| Token | Hex | Use |
+|---|---|---|
+| `error-line` | `#5a2620` | Border of the "Couldn't load shows" box. |
+| `warn-bg` / `warn-line` / `warn-ink` | `#211a13` / `#3b2c1e` / `#e8d6c2` | Partial-failure strip ("SeatGeek didn't respond…"). |
 
 ### Named Rules
-**The One Accent Rule.** Spotlight amber (`#f59e0b`) is the only accent in normal flow. It appears on CTA buttons, links, and focus rings. No blue accents anywhere. No gradient on the CTA — flat amber, dark text, full stop.
+**The One Accent Rule.** Orange is the only accent. It marks what you can act on or where you are (CTA, active chip, city picker, focus). No second accent color, no blue anywhere, no gradients.
 
-**The Anti-Slate Rule.** The cold slate neutral palette is acceptable as infrastructure, but the amber accent is what gives it character. Don't reintroduce blue accents. Don't add a second accent color without strategic reason.
+**The One Filled Button Rule.** Each screen has at most one `accent`-filled button: the ticket CTA on the show page, "See this month" in the empty state. Secondary actions are outlined (`border-line-strong`) or inverse (`bg-ink text-canvas`, used for "Try again").
+
+**Accent text vs. accent fill.** Use `accent-text` (not `accent`) for orange text on `canvas`; it's tuned for legibility at small sizes.
 
 ## 3. Typography
 
-**Display / Heading Font:** Barlow Condensed (wght 500–700, Google Fonts)
-**Body / UI Font:** Space Grotesk (wght 400–600, Google Fonts)
+**Display / Heading Font:** Barlow Condensed (500/600/700, Google Fonts)
+**Body / UI Font:** Space Grotesk (400/500/600, Google Fonts)
 
-**Character:** A condensed grotesque paired with a quirky geometric sans on the proportion axis — narrow, muscular headings against a wider, more human-feeling body. Barlow Condensed references concert posters and venue boards directly; Space Grotesk has enough personality (distinctive R, ink traps, subtle geometric quirks) to push back against the corporate system-ui void, while remaining clean enough for UI labels and card metadata.
+Use tabular numbers (`.tabular` or a `<time>` element) for every date, time, price and count.
 
-### Hierarchy
-- **Display** (Barlow Condensed bold 700, 1.875rem md:3rem, leading-none, -0.025em): Page h1s — artist name, genre name, "Local Upcoming Music", app name. Maximum one per page.
-- **Headline** (Barlow Condensed semibold 600, 1.25rem, leading-tight): Section h2s — "Upcoming Events", "Show Info", "Historical Setlists", "Upcoming Tour Dates".
-- **Title** (Space Grotesk semibold 600, 1rem): Card h3 — event/show names in the discovery feed.
-- **Body** (Space Grotesk regular 400, 0.875rem, 1.5 leading): Card dates, descriptions. Slightly more leading than system-ui compensates for perceived weight loss on dark backgrounds.
-- **Label** (Space Grotesk regular 400, 0.75rem): Venue, city, country metadata. Smallest size in the system.
+### Scale
+Tailwind `fontSize` steps in `tailwind.config.ts` (`text-13`, `text-15`, `text-30`, …). Body steps 12/14/16 are Tailwind's `text-xs`/`text-sm`/`text-base`.
+
+- **Condensed:** 72 (show-page headliner, desktop) / 64 (home and artist h1, desktop) / 52 (headliners on mobile) / 40 (section h2 "Setlist history", day numbers) / 34 (state titles) / 30 (feed headliner, wordmark) / 24 (mobile headliner) / 22 ("More tour dates") / 20 (set headers).
+- **Body:** 16 (support line on show page) / 15 (venue names, search input, songs) / 14 (support acts, helper copy, chips) / 13 (metadata, song numbers, notes) / 12 (column headers, badges, tags).
 
 ### Named Rules
-**The Two-Family Rule.** Barlow Condensed is for headings (h1, h2) only — never on buttons, inputs, card body text, or UI labels. Space Grotesk carries everything else. The contrast axis is proportion (condensed vs. normal), not style.
+**The Two-Family Rule.** Barlow Condensed is for headings, headliner names, day numbers and set headers. Space Grotesk carries everything else — buttons, inputs, labels, metadata.
 
-**The No-Uppercase Rule.** Avoid uppercase tracking as a section kicker. The venue board uses the weight of condensed type to create hierarchy, not all-caps decoration.
+**The No-Uppercase Rule.** No uppercase tracking as a kicker. Hierarchy comes from the weight and size of condensed type.
 
 ## 4. Elevation
 
-This system is flat-first. Cards use transparent backgrounds (`bg-slate-900/60`) rather than opaque blocks with shadow, creating depth through opacity layering rather than physical shadow. Shadows are reserved for interactive surfaces that need affordance.
+Flat by default. Depth comes from the step between `canvas` → `surface` → `surface-hi`, not shadow.
 
 ### Shadow Vocabulary
-- **Form Container** (`shadow-lg shadow-zinc-950/60`): Applied to the search form. Separates it from the header gradient without hard edges.
+- **Popover** (`shadow-popover`: `0 18px 40px rgba(0,0,0,.55)`): search suggestions and the city picker only.
 
 ### Named Rules
-**The Flat-by-Default Rule.** Card surfaces are flat. Shadows appear only on elements that require perceived lift: the primary CTA button, the global search form. Do not add shadow to content cards — that escalates decoration over signal.
+**The Flat-by-Default Rule.** Rows, lists and panels never get a shadow. Only floating popovers do.
+
+**Stacking.** `v-motion` leaves a `transform` on the header and page wrappers, so each is its own stacking context. The header carries `relative z-20` so its popovers sit above page content, and anything `position: fixed` inside a page (mobile ticket CTA, full-screen mobile search) is teleported to `#teleports`.
 
 ## 5. Components
 
-### Buttons
-- **Primary CTA:** Rounded corners (8px), flat `bg-amber-500` with `hover:bg-amber-400`. Dark (`zinc-950`) text for ~9.4:1 contrast. Full-width on cards, inline-flex centered. No shadow — the amber color provides sufficient affordance.
-- **Disabled / Unavailable:** `border-slate-700 bg-slate-800 text-slate-500`. No hover treatment. Communicates absence, not action.
-- **Retry button (error states):** `bg-red-700 hover:bg-red-600 text-white`. Smaller, `rounded-md`, `px-3 py-2`.
+### Header
+One row: wordmark (condensed 30px) + search box (`h-11`, `max-w-[620px]`, `bg-surface`, `border-line-strong`, focus-within `border-accent`), `border-b border-line`. Mobile stacks them. No tagline, no gradient.
 
-### Cards / Containers
-- **Standard card:** `rounded-lg border border-slate-800 bg-slate-900/60`. Padding `p-4` (list items) or `p-5` (detail panels). Semi-transparent background creates layering depth without shadow.
-- **Search form:** `rounded-xl border border-slate-700/80 bg-slate-900/70 shadow-lg shadow-sky-950/30`. Slightly larger radius than content cards. The single elevated surface in the header.
-- **No nested cards.** Never put a card inside a card.
+### Search suggestions
+Popover under the box: a "Searching every city · Ticketmaster + SeatGeek" line, then Artists / Genres (/ Venues once `/venue/[id]` exists), up to 3 each. Name in `ink` 15px, meta right-aligned in `muted` 13px. Highlight is `bg-surface-hi`. ↑/↓/Enter/Esc; `/` focuses. Mobile opens full screen with Cancel; rows ≥ 48px with `skeleton-soft` dividers.
 
-### Inputs / Fields
-- **Style:** `rounded-lg border border-slate-600 bg-slate-950 text-slate-100`. The input sits flush with the darkest background — it recedes until focused.
-- **Focus:** `focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20`. A 2-step treatment: the border shifts to accent blue, and a faint ring adds a glow without being aggressive.
-- **Placeholder:** `placeholder:text-slate-500`. Must meet 4.5:1 contrast — slate-500 on slate-950 is borderline; check before any palette changes.
-- **Select dropdown:** Same style as input. `bg-slate-950` to prevent system-default styling.
+### Feed row
+One `NuxtLink` per show. Desktop grid `88px | 1fr | 240px | 120px | 96px` (Date / Lineup / Venue / Time / Tickets), `py-[18px] px-4`, `border-t border-line`, hover `bg-surface`. The date shows only on a day's first row. Mobile grid `48px | 1fr`, price beside the headliner, one muted meta line.
 
-### Setlist Accordion
-The signature component. A list of historical show entries that expand to reveal the set. Each entry: `rounded-lg border border-slate-800 bg-slate-900/60`. The toggle button is full-width with a left-aligned date/venue and a right-aligned "Show songs / Hide songs" label. No icon — text-only toggle is intentional (the venue board is text). Expanded content separated by `border-t border-slate-800`.
+### Segmented control (date tabs)
+Track `bg-surface border-line rounded-lg p-1`; active `bg-ink text-canvas font-semibold rounded-seg`; inactive `text-ink-2`. Counts at 13px.
 
-### Navigation / Links
-- **In-app links:** `text-sky-400 hover:text-sky-300`. No underline by default. Color shift on hover is the only affordance.
-- **Logo/home link:** `text-white group-hover:text-sky-300`. Headline-weight word mark, no icon.
+### Chips
+`rounded-full px-3.5 py-1.5 text-sm`. Active: `bg-accent border-accent text-on-accent font-semibold`. Inactive: `border-line-strong text-ink-2`, hover `border-muted`. Wrap on desktop, one scrolling line on mobile.
+
+### Tags and badges
+Genre tag: `rounded-tag border-line-strong text-xs text-ink-3`. Urgency badge: `rounded-tag bg-accent-soft text-accent-soft-ink text-xs font-semibold` — "Tonight" and "Tomorrow" only.
+
+### Setlist accordion
+The signature component. Each row is a `<button>` (grid `120px | 1fr | auto`): date, venue · city with tour below, "{n} songs" / "Hide songs". One open at a time; the most recent setlist that has songs opens by default. Body is indented to the venue column; each set has a condensed 20px header followed by a `line` rule ("Encore" headers in `accent-text`). Songs are numbered continuously across sets in `faint`; notes (cover of X, info, tape) are inline in `muted` 13px; tape entries are unnumbered and don't count.
+
+### States
+Keep headings and tabs in place; only the list area changes. Loading: 5 skeleton rows matching the row grid (`motion-safe:animate-pulse`). Empty: condensed 34px title, `ink-3` helper, actions only for things actually checked. Error: `border-error-line` box with an inverse "Try again". Partial: `warn-*` strip above the list with an accent "Retry".
 
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** keep the background at Stage Blackout (`#020617`) or darker. The venue is never beige.
-- **Do** use text-slate-100 (`#f1f5f9`) for all headings and primary content text. Verify 4.5:1 contrast before any palette changes.
-- **Do** use `rounded-lg` (8px) consistently on all cards and interactive elements. Consistency is the system.
-- **Do** use `focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20` on every focusable input element. Keyboard navigation is not optional.
-- **Do** keep card surfaces flat (`bg-slate-900/60`, no shadow). Elevation is reserved for the CTA and search form only.
-- **Do** use `@media (prefers-reduced-motion: reduce)` for every animation. The page entrance fade (`opacity 0→1, y -10→0`) must have a reduced-motion fallback.
-- **Do** favor type-driven hierarchy over icons and decorative elements. The information IS the design.
+- **Do** use the Tailwind tokens (`canvas`, `ink-2`, `accent-text`, …) for every color.
+- **Do** keep text at WCAG AA. Measured on `canvas` / `surface`: `ink` 16.3 / 15.1, `ink-2` 11.4 / 10.6, `ink-3` 8.4 / 7.8, `muted` 5.9 / 5.5, `accent-text` 8.0 / 7.4, `on-accent` on `accent` 7.5. Two handoff values fall short: `placeholder` on `surface` is 4.46:1 (marginally under 4.5, so never use it for real content), and `faint` is 3.3:1, acceptable only for the redundant song numbers.
+- **Do** use tabular numbers for dates, times, prices and counts.
+- **Do** make a whole row the click target instead of adding a per-row button.
+- **Do** guard every animation for `prefers-reduced-motion` (`motion-safe:` for Tailwind, `.motion-guard` for `v-motion`).
+- **Do** say plainly when data is partial or missing ("Price not listed", "SeatGeek didn't respond…") instead of hiding it.
 
 ### Don't:
-- **Don't** reintroduce sky-blue or corporate blue as an accent. The accent is amber (`#f59e0b`). One voice.
-- **Don't** use `background-clip: text` with gradient backgrounds on any text element. Gradient text is decorative and never meaningful.
-- **Don't** add `border-left` greater than 1px as a colored accent stripe on cards or callouts. Use background tints, icons, or full borders instead.
-- **Don't** use uppercase tracking (e.g., `tracking-[0.18em] uppercase`) as a section kicker. The "Discover Live Music" label in the current header is an exception to clean up, not a pattern to repeat.
-- **Don't** build identical card grids with only icon + heading + body. Vary density, hierarchy, and structure to match the content's actual shape.
-- **Don't** replicate the Ticketmaster / StubHub pattern of competing CTAs and aggressive calls to action. One primary action per card, always.
-- **Don't** import Spotify's algorithmic discovery language — "You might also like", "Recommended for you", "Based on your listening". This is a fan tool, not an algorithm.
-- **Don't** add shadows to content cards. The Flat-by-Default Rule is not a suggestion.
-- **Don't** let placeholder text fall below 4.5:1 contrast. `text-slate-500` on `slate-950` is marginal — verify with any palette change.
+- **Don't** use Tailwind's default slate, zinc, amber or sky palettes. That was the old system.
+- **Don't** add a second accent color or gradients, including gradient text.
+- **Don't** add a colored `border-left` stripe to rows or callouts.
+- **Don't** use uppercase tracking as a section kicker.
+- **Don't** build card grids for lists of shows; it's a schedule.
+- **Don't** replicate Ticketmaster/StubHub's competing CTAs. One filled button per screen.
+- **Don't** import Spotify's algorithmic language ("You might also like", "Recommended for you").
+- **Don't** add shadows to anything that isn't a popover.

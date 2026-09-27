@@ -3,7 +3,12 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    color-scheme: dark;
+  }
+
   body {
+    @apply bg-canvas font-sans text-ink;
     font-optical-sizing: auto;
     font-kerning: normal;
     /* Compensate for perceived weight loss on dark backgrounds */
@@ -11,9 +16,32 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* tabular-nums for dates and times so they don't shift while loading */
+  /* tabular-nums for dates, times and prices so they don't shift while loading */
   time,
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* v-motion writes inline styles, so the reduced-motion guard needs !important. */
+@media (prefers-reduced-motion: reduce) {
+  .motion-guard {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }

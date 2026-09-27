@@ -1,60 +1,74 @@
 import { ref } from 'vue'
-import type { SetlistItem, TicketmasterEvent } from '../types/music'
+import type { MergedEventsResult, SetlistItem, SuggestResponse, TicketmasterEvent } from '../types/music'
 import {
   buildArtistUpcomingCacheKey,
   buildGenreCacheKey,
   buildLocalDiscoveryCacheKey,
   buildSetlistHistoryCacheKey,
+  buildSuggestCacheKey,
   type LocalDiscoveryLookup
 } from '../utils/query-keys'
 
-type EventCache = Record<string, TicketmasterEvent[]>
+type MergedCache = Record<string, MergedEventsResult>
 type SetlistCache = Record<string, SetlistItem[]>
+type SuggestCache = Record<string, SuggestResponse>
 
 export const useMusicCacheStore = defineStore('music-cache', () => {
-  const localDiscoveryCache = ref<EventCache>({})
-  const genreDiscoveryCache = ref<EventCache>({})
-  const artistUpcomingCache = ref<EventCache>({})
+  const localDiscoveryCache = ref<MergedCache>({})
+  const genreDiscoveryCache = ref<MergedCache>({})
+  const artistUpcomingCache = ref<MergedCache>({})
   const setlistHistoryCache = ref<SetlistCache>({})
+  const suggestCache = ref<SuggestCache>({})
 
-  const getLocalDiscovery = (lookup: LocalDiscoveryLookup): TicketmasterEvent[] | undefined => {
-    const key = buildLocalDiscoveryCacheKey(lookup)
-    return localDiscoveryCache.value[key]
+  const getLocalDiscovery = (lookup: LocalDiscoveryLookup): MergedEventsResult | undefined => {
+    return localDiscoveryCache.value[buildLocalDiscoveryCacheKey(lookup)]
   }
 
-  const setLocalDiscovery = (lookup: LocalDiscoveryLookup, events: TicketmasterEvent[]): void => {
-    const key = buildLocalDiscoveryCacheKey(lookup)
-    localDiscoveryCache.value[key] = events
+  const setLocalDiscovery = (lookup: LocalDiscoveryLookup, result: MergedEventsResult): void => {
+    localDiscoveryCache.value[buildLocalDiscoveryCacheKey(lookup)] = result
   }
 
-  const getGenreDiscovery = (classificationName: string): TicketmasterEvent[] | undefined => {
-    const key = buildGenreCacheKey(classificationName)
-    return genreDiscoveryCache.value[key]
+  const getGenreDiscovery = (classificationName: string): MergedEventsResult | undefined => {
+    return genreDiscoveryCache.value[buildGenreCacheKey(classificationName)]
   }
 
-  const setGenreDiscovery = (classificationName: string, events: TicketmasterEvent[]): void => {
-    const key = buildGenreCacheKey(classificationName)
-    genreDiscoveryCache.value[key] = events
+  const setGenreDiscovery = (classificationName: string, result: MergedEventsResult): void => {
+    genreDiscoveryCache.value[buildGenreCacheKey(classificationName)] = result
   }
 
-  const getArtistUpcoming = (artistName: string): TicketmasterEvent[] | undefined => {
-    const key = buildArtistUpcomingCacheKey(artistName)
-    return artistUpcomingCache.value[key]
+  const getArtistUpcoming = (artistName: string): MergedEventsResult | undefined => {
+    return artistUpcomingCache.value[buildArtistUpcomingCacheKey(artistName)]
   }
 
-  const setArtistUpcoming = (artistName: string, events: TicketmasterEvent[]): void => {
-    const key = buildArtistUpcomingCacheKey(artistName)
-    artistUpcomingCache.value[key] = events
+  const setArtistUpcoming = (artistName: string, result: MergedEventsResult): void => {
+    artistUpcomingCache.value[buildArtistUpcomingCacheKey(artistName)] = result
+  }
+
+  /** Any event already loaded this session, so the show page can render without refetching. */
+  const findCachedEvent = (eventId: string): TicketmasterEvent | undefined => {
+    for (const cache of [localDiscoveryCache.value, artistUpcomingCache.value, genreDiscoveryCache.value]) {
+      for (const result of Object.values(cache)) {
+        const match = result.events.find((event) => event.id === eventId)
+        if (match) return match
+      }
+    }
+    return undefined
   }
 
   const getSetlistHistory = (artistName: string): SetlistItem[] | undefined => {
-    const key = buildSetlistHistoryCacheKey(artistName)
-    return setlistHistoryCache.value[key]
+    return setlistHistoryCache.value[buildSetlistHistoryCacheKey(artistName)]
   }
 
   const setSetlistHistory = (artistName: string, setlists: SetlistItem[]): void => {
-    const key = buildSetlistHistoryCacheKey(artistName)
-    setlistHistoryCache.value[key] = setlists
+    setlistHistoryCache.value[buildSetlistHistoryCacheKey(artistName)] = setlists
+  }
+
+  const getSuggestions = (query: string): SuggestResponse | undefined => {
+    return suggestCache.value[buildSuggestCacheKey(query)]
+  }
+
+  const setSuggestions = (query: string, suggestions: SuggestResponse): void => {
+    suggestCache.value[buildSuggestCacheKey(query)] = suggestions
   }
 
   const clearSessionCaches = (): void => {
@@ -62,6 +76,7 @@ export const useMusicCacheStore = defineStore('music-cache', () => {
     genreDiscoveryCache.value = {}
     artistUpcomingCache.value = {}
     setlistHistoryCache.value = {}
+    suggestCache.value = {}
   }
 
   const resetStore = (): void => {
@@ -73,14 +88,18 @@ export const useMusicCacheStore = defineStore('music-cache', () => {
     genreDiscoveryCache,
     artistUpcomingCache,
     setlistHistoryCache,
+    suggestCache,
     getLocalDiscovery,
     setLocalDiscovery,
     getGenreDiscovery,
     setGenreDiscovery,
     getArtistUpcoming,
     setArtistUpcoming,
+    findCachedEvent,
     getSetlistHistory,
     setSetlistHistory,
+    getSuggestions,
+    setSuggestions,
     clearSessionCaches,
     resetStore
   }

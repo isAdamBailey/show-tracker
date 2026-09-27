@@ -1,173 +1,74 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import ShowSetlistButton from '../../components/ShowSetlistButton.vue'
-import type { TicketmasterEvent } from '../../types/music'
-import { fetchMergedArtistEvents, getArtistNameFromEvent, getEventListingLabel } from '../../utils/events'
-import { formatShowDate, formatShowTime, getUrgencyLabel } from '../../utils/dates'
+import ErrorPanel from '../../components/ErrorPanel.vue'
+import FeedList from '../../components/FeedList.vue'
+import FeedSkeleton from '../../components/FeedSkeleton.vue'
+import SetlistHistory from '../../components/SetlistHistory.vue'
+import type { MergedEventsResult, SetlistItem, TicketmasterEvent } from '../../types/music'
+import { allSourcesFailed } from '../../utils/events'
+import { readRouteValue } from '../../utils/route'
 
 interface ArtistPagePayload {
-  upcomingEvents: TicketmasterEvent[]
-  upcomingError: string | null
+  upcoming: MergedEventsResult
+  setlists: SetlistItem[]
+  setlistError: boolean
 }
 
 const route = useRoute()
+const { loadArtistUpcoming, loadSetlistHistory } = useArtistData()
 
-const rawArtistParam = computed<string>(() => {
-  const value = route.params.artistName
-  if (Array.isArray(value)) {
-    return value[0] ?? ''
-  }
-  return value ?? ''
-})
-
-const artistName = computed<string>(() => decodeURIComponent(rawArtistParam.value))
-const cityFromQuery = computed<string>(() => {
-  const value = route.query.city
-  if (Array.isArray(value)) {
-    return decodeURIComponent(value[0] ?? '')
-  }
-  if (typeof value !== 'string') {
-    return ''
-  }
-  return decodeURIComponent(value)
-})
-
-const getEventArtistName = (event: TicketmasterEvent): string | null => {
-  return getArtistNameFromEvent(event) ?? artistName.value
-}
-
-const getShowRoute = (event: TicketmasterEvent): string | null => {
-  const eventArtistName = getEventArtistName(event)
-  if (!eventArtistName) {
-    return null
-  }
-  const basePath = `/show/${encodeURIComponent(event.id)}?artistName=${encodeURIComponent(eventArtistName)}`
-  if (!cityFromQuery.value) {
-    return basePath
-  }
-  return `${basePath}&city=${encodeURIComponent(cityFromQuery.value)}`
-}
+const artistName = computed<string>(() => readRouteValue(route.params.artistName))
 
 const { data, pending, refresh } = await useAsyncData<ArtistPagePayload>(
-  () => `artist-page:${rawArtistParam.value}:${cityFromQuery.value}`,
+  () => `artist-page:${artistName.value}`,
   async () => {
-    try {
-      const upcomingEvents = await fetchMergedArtistEvents(
-        artistName.value,
-        cityFromQuery.value || undefined
-      )
-      return {
-        upcomingEvents,
-        upcomingError: null
-      }
-    } catch (error: unknown) {
-      return {
-        upcomingEvents: [],
-        upcomingError: String(error)
-      }
+    const [upcomingResult, setlistResult] = await Promise.allSettled([
+      loadArtistUpcoming(artistName.value),
+      loadSetlistHistory(artistName.value)
+    ])
+    return {
+      upcoming:
+        upcomingResult.status === 'fulfilled'
+          ? upcomingResult.value
+          : { events: [], ticketmaster: 'failed', seatgeek: 'failed' },
+      setlists: setlistResult.status === 'fulfilled' ? setlistResult.value : [],
+      setlistError: setlistResult.status === 'rejected'
     }
   },
-  { watch: [artistName, cityFromQuery] }
+  { watch: [artistName] }
 )
 
-const upcomingEvents = computed<TicketmasterEvent[]>(() => data.value?.upcomingEvents ?? [])
-const upcomingError = computed<string | null>(() => data.value?.upcomingError ?? null)
+const events = computed<TicketmasterEvent[]>(() => data.value?.upcoming.events ?? [])
+const failed = computed<boolean>(() => Boolean(data.value && allSourcesFailed(data.value.upcoming)))
 
-const hasUpcomingData = computed<boolean>(() => upcomingEvents.value.length > 0)
-
-const isEmpty = computed<boolean>(() => !pending.value && !upcomingError.value && !hasUpcomingData.value)
+useHead(() => ({ title: `${artistName.value} · Live Music Tracker` }))
 </script>
 
 <template>
-  <main class="mx-auto flex max-w-6xl flex-col gap-6 p-6">
-    <header class="space-y-1">
-      <h1 class="font-display text-3xl font-bold leading-none tracking-tight text-slate-100 text-balance">{{ artistName }}</h1>
-      <p class="text-sm text-slate-400">
-        Upcoming tour dates from Ticketmaster and SeatGeek
-        <span v-if="cityFromQuery">in {{ cityFromQuery }}</span>.
-      </p>
+  <main class="mx-auto max-w-screen-2xl pb-16">
+    <header class="px-[18px] pt-8 md:px-10 md:pt-10">
+      <h1 class="text-balance font-display text-52 font-bold leading-[0.9] tracking-[-0.015em] text-ink md:text-64">
+        {{ artistName }}
+      </h1>
+      <p class="mt-3 text-sm text-muted">Upcoming shows in every city · Ticketmaster + SeatGeek</p>
     </header>
 
-    <section
-      v-if="pending"
-      class="rounded-lg border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300"
-    >
-      Loading artist data...
+    <section class="pt-6 lg:px-6" aria-live="polite" :aria-busy="pending">
+      <FeedSkeleton v-if="pending" />
+      <ErrorPanel v-else-if="failed" class="mx-[18px] lg:mx-4" @retry="refresh()" />
+      <p v-else-if="events.length === 0" class="mx-[18px] border-t border-line py-6 text-15 text-ink-3 lg:mx-4">
+        No upcoming shows for {{ artistName }}.
+      </p>
+      <FeedList v-else :events="events" />
     </section>
 
-    <section
-      v-else-if="upcomingError"
-      class="rounded-lg border border-red-800 bg-red-950/40 p-5 text-sm text-red-200"
-    >
-      <p>Unable to load upcoming events.</p>
-      <button
-        type="button"
-        class="mt-3 rounded-md bg-red-700 px-3 py-2 text-xs font-medium text-white transition hover:bg-red-600"
-        @click="refresh()"
-      >
-        Retry
-      </button>
-    </section>
-
-    <section
-      v-else-if="isEmpty"
-      class="rounded-lg border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300"
-    >
-      No upcoming tour dates found for this artist.
-    </section>
-
-    <section v-if="hasUpcomingData" class="space-y-3">
-      <h2 class="font-display text-xl font-semibold leading-tight tracking-tight text-slate-100 text-balance">Upcoming Tour Dates</h2>
-      <div class="grid gap-4 md:grid-cols-2">
-        <article
-          v-for="event in upcomingEvents"
-          :key="event.id"
-          class="rounded-lg border border-slate-800 bg-slate-900/60 p-4"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <h3 class="text-base font-semibold text-slate-100">{{ event.name }}</h3>
-            <span
-              v-if="event.dates?.start?.localDate && getUrgencyLabel(event.dates.start.localDate)"
-              class="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold bg-amber-500/15 text-amber-400"
-            >
-              {{ getUrgencyLabel(event.dates.start.localDate) }}
-            </span>
-          </div>
-          <p class="mt-1 text-sm text-slate-300">
-            <time
-              v-if="event.dates?.start?.localDate"
-              :datetime="event.dates.start.localDate"
-            >{{ formatShowDate(event.dates.start.localDate) }}</time>
-            <span v-else>Unknown date</span>
-            <span v-if="event.dates?.start?.localTime"> · {{ formatShowTime(event.dates.start.localTime) }}</span>
-          </p>
-          <p class="text-xs text-slate-400">
-            {{ event._embedded?.venues?.[0]?.name ?? 'Unknown venue' }}
-            <span v-if="event._embedded?.venues?.[0]?.city?.name">
-              · {{ event._embedded?.venues?.[0]?.city?.name }}
-            </span>
-          </p>
-          <div class="mt-3 flex flex-wrap items-center gap-3">
-            <ShowSetlistButton :to="getShowRoute(event)" />
-            <a
-              v-if="event.url"
-              :href="event.url"
-              target="_blank"
-              rel="noreferrer noopener"
-              class="w-full text-center text-xs font-medium text-amber-400 hover:text-amber-300"
-            >
-              {{ getEventListingLabel(event) }}
-            </a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section
-      v-else-if="!pending && !upcomingError"
-      class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-400"
-    >
-      No upcoming tour dates found.
-    </section>
+    <SetlistHistory
+      class="px-[18px] pt-14 md:px-10"
+      :setlists="data?.setlists ?? []"
+      :artist-name="artistName"
+      :pending="pending"
+      :failed="data?.setlistError ?? false"
+      @retry="refresh()"
+    />
   </main>
 </template>
