@@ -1,28 +1,26 @@
 export interface LocalDiscoveryLookup {
-  geoPoint?: string
-  dmaId?: string
+  geoPoint: string
+  radiusMiles: number
+  /** Local date the Month window starts on, so a cached feed expires at midnight. */
+  startDate: string
 }
 
 export const buildLocalDiscoveryCacheKey = (lookup: LocalDiscoveryLookup): string => {
-  if (lookup.geoPoint) {
-    return `local:geoPoint:${lookup.geoPoint}`
-  }
-
-  if (lookup.dmaId) {
-    return `local:dmaId:${lookup.dmaId}`
-  }
-
-  throw new Error('Local discovery cache key requires geoPoint or dmaId.')
+  return `local:${lookup.geoPoint}:${lookup.radiusMiles}mi:${lookup.startDate}`
 }
 
 export const buildGenreCacheKey = (classificationName: string): string => {
-  return `genre:${classificationName}`
+  return `genre:${classificationName.toLowerCase()}`
 }
 
 export const buildArtistUpcomingCacheKey = (artistName: string): string => {
-  return `artist-upcoming:${artistName}`
+  return `artist-upcoming:${artistName.toLowerCase()}`
 }
 
 export const buildSetlistHistoryCacheKey = (artistName: string): string => {
   return `setlist-history:${artistName}`
+}
+
+export const buildSuggestCacheKey = (query: string): string => {
+  return `suggest:${query.trim().toLowerCase()}`
 }
