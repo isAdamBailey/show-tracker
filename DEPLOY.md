@@ -65,7 +65,9 @@ executes `node .output/server/index.mjs`. It does not rely on a PM2 process
 name. Start the daemon in Forge and verify its assigned `daemon-<id>` and
 `RUNNING` state with `sudo supervisorctl status`. Record that ID for the deploy
 script; Forge can assign a new ID when a daemon is edited, so check it again
-after any edit and remove orphaned entries.
+after any edit and remove orphaned entries. If Forge's Nuxt site template
+started its own `site-<site-id>` PM2 process, remove that template process and
+save the PM2 list so Supervisor is the only process manager for this app.
 
 ## Deploy script
 
@@ -91,28 +93,22 @@ load the new release.
 
 ## nginx and TLS
 
-In Forge's nginx configuration, replace the site's catch-all `location /`
-block with the following, preserving the rest of Forge's SSL and server
-configuration. Use the selected daemon port consistently:
+Keep the domain configuration's `include forge-conf/<site-id>/site.conf;`
+directive intact. It lets Forge add its temporary ACME challenge route while
+issuing or renewing certificates. In Forge's **General site configuration**,
+edit the existing `proxy_pass` target in the shared `location /` block to the
+daemon's localhost port. Preserve the other directives in that file:
 
 ```nginx
-location / {
-    proxy_pass http://127.0.0.1:3005;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_cache_bypass $http_upgrade;
-}
+proxy_pass http://127.0.0.1:3005;
 ```
 
 Provision and verify a TLS certificate for `show-tracker.adambailey.io` in
-Forge. Check the rendered nginx configuration and reload nginx after validating
-it with `sudo nginx -t`. Forge may regenerate nginx configuration after site or
-certificate changes, so recheck the proxy block afterward.
+Forge. Check that the domain configuration still includes the shared site
+configuration, that the shared proxy target remains `127.0.0.1:3005`, and that
+the rendered configuration passes `sudo nginx -t`. Forge may regenerate nginx
+configuration after site or certificate changes, so recheck both files
+afterward.
 
 ## Cutover and rollback
 
