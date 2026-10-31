@@ -2,7 +2,7 @@
 
 Nuxt 4 app for discovering live events and viewing historical setlists.
 
-[![Laravel Forge Site Deployment Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fforge.laravel.com%2Fsite-badges%2F2cf2e96a-40e8-4298-ac3e-b839b945170b%3Flabel%3D1&style=flat-square)](https://forge.laravel.com/adam-f6w/adambaileyio/3211818)
+[![Laravel Forge Site Deployment Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fforge.laravel.com%2Fsite-badges%2Faec44cc0-c6d1-42d5-a480-71bd6f90642b&style=plastic)](https://forge.laravel.com/adam-f6w/stunning-fern-s7f/3475409)
 
 ## Stack
 
@@ -22,7 +22,7 @@ Nuxt 4 app for discovering live events and viewing historical setlists.
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 24
 - npm
 
 ## Setup
@@ -40,6 +40,8 @@ SEATGEEK_CLIENT_ID=your_seatgeek_client_id
 ```
 
 Register a free SeatGeek client ID at [seatgeek.com/account/develop](https://seatgeek.com/account/develop).
+
+For production deployment on Laravel Forge, see [DEPLOY.md](./DEPLOY.md).
 
 Runtime config:
 
